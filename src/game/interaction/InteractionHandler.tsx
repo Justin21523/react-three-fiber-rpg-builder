@@ -2,12 +2,21 @@ import { useEffect } from 'react';
 import { useInteractionStore } from '../../stores/interactionStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useWorldStore } from '../../stores/worldStore';
+import { useDialogueStore } from '../../stores/dialogueStore';
+import { useInventoryStore } from '../../stores/inventoryStore';
+import { useQuestStore } from '../../stores/questStore';
+import { useDoorStore } from '../../stores/doorStore';
+import { useFlagStore } from '../../stores/flagStore';
 import { getKitArea } from '../../data/areas';
+import { getNpcProfile } from '../../data/npcs';
+import { getDoorDef } from '../../data/doors';
+import { getAreaEntities } from '../../data/areaEntities';
 import { arrivalSpawn } from '../world/gateLayout';
+import { executeEffect } from '../executeEffect';
 
 // Kit — non-visual [E] dispatcher. Reads the current interaction target (set by sensor colliders on
-// gates / NPCs / items / doors) and acts on it. Phase B handles travel gates; Phase C adds the
-// npc / item / door branches (dialogue, pickup, locked-door checks). Renders nothing.
+// gates / NPCs / items / doors) and acts on it: travel, start dialogue, pick up an item (+ its effects),
+// or open a door if the player holds its key. Generic — no yokai/encounter/codex coupling.
 export const InteractionHandler = () => {
   const currentTargetId = useInteractionStore((s) => s.currentTargetId);
   const targetType = useInteractionStore((s) => s.targetType);
@@ -17,16 +26,49 @@ export const InteractionHandler = () => {
       if (e.code !== 'KeyE' || e.repeat || !currentTargetId || !targetType) return;
       const tag = (document.activeElement?.tagName ?? '').toLowerCase();
       if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (useDialogueStore.getState().isActive) return; // DialogueBox owns [E] while talking
+
+      const interaction = useInteractionStore.getState();
+      const areaId = usePlayerStore.getState().currentAreaId;
 
       if (targetType === 'gate') {
         const target = getKitArea(currentTargetId);
         if (!target) return;
-        const fromAreaId = usePlayerStore.getState().currentAreaId;
-        // Drop the player just inside the gate that leads back to where they came from.
-        const spawn = arrivalSpawn(target.id, fromAreaId);
+        const spawn = arrivalSpawn(target.id, areaId);
         usePlayerStore.getState().travelToArea(target.id, spawn);
         useWorldStore.getState().discoverArea(target.id);
-        useInteractionStore.getState().clearTarget(target.id);
+        interaction.clearTarget(target.id);
+        return;
+      }
+
+      if (targetType === 'npc') {
+        useFlagStore.getState().setFlag(`npc_talked_${currentTargetId}`);
+        const npc = getNpcProfile(currentTargetId);
+        if (npc?.dialogueTreeId) useDialogueStore.getState().startDialogue(npc.dialogueTreeId);
+        return;
+      }
+
+      if (targetType === 'item') {
+        useInventoryStore.getState().addItem(currentTargetId);
+        useInventoryStore.getState().markPickedUp(currentTargetId);
+        interaction.clearTarget(currentTargetId);
+        getAreaEntities(areaId)?.items?.find((p) => p.itemId === currentTargetId)?.onPickupEffects?.forEach(executeEffect);
+        return;
+      }
+
+      if (targetType === 'door') {
+        const door = getDoorDef(currentTargetId);
+        if (!door) return;
+        if (useInventoryStore.getState().hasItem(door.unlockItemId)) {
+          useDialogueStore.getState().startDialogue('dialogue_door_unlocked');
+          useDoorStore.getState().unlockDoor(door.id);
+          if (door.linkedQuestId && door.linkedObjectiveId) {
+            useQuestStore.getState().updateObjective(door.linkedQuestId, door.linkedObjectiveId, true);
+          }
+          interaction.clearTarget(door.id);
+        } else {
+          useDialogueStore.getState().startDialogue('dialogue_door_locked');
+        }
       }
     };
     window.addEventListener('keydown', onKey);

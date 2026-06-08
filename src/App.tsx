@@ -13,6 +13,8 @@ import { EditorHubPanel } from './ui/EditorHubPanel';
 import { TerrainBrushHud } from './ui/TerrainBrushHud';
 import { InteractionPrompt } from './ui/InteractionPrompt';
 import { WorldClockHUD } from './ui/WorldClockHUD';
+import { DialogueBox } from './ui/DialogueBox';
+import { QuestTracker } from './ui/QuestTracker';
 
 // Kit — top-level: the 3D <Canvas> with DOM overlays layered over it. F1 toggles Edit Mode; in Edit
 // Mode the camera free-pans, gizmos appear, and the Editor Hub + floating terrain palette are usable.
@@ -60,6 +62,8 @@ export const App = () => {
       <WorldClockHUD />
       {/* Overworld-only HUD (hidden while editing). */}
       {!editMode && <InteractionPrompt />}
+      {!editMode && <QuestTracker />}
+      <DialogueBox />
       {editMode && <TerrainBrushHud />}
       {editMode && editorHubOpen && <EditorHubPanel />}
       <Canvas shadows dpr={[1, 1.75]} camera={{ position: [0, 5, 10], fov: 50, near: 0.1, far: 1500 }}>
