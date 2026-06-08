@@ -8,6 +8,7 @@ import { FlatPbrGround } from './FlatPbrGround';
 import { PbrPatchLayer } from './PbrPatchLayer';
 import { SceneSetPieceLayer } from './SceneSetPieceLayer';
 import { SampleEntities } from './SampleEntities';
+import { EditableNpcLayer } from './EditableNpcLayer';
 import { ZoneGate } from './ZoneGate';
 
 // Kit — renders one area's world: the ground stack (flat / flat-PBR / heightfield terrain via the
@@ -27,6 +28,7 @@ export const AreaRenderer = ({ areaId }: { areaId: string }) => {
       <PbrPatchLayer areaId={areaId} />
       <SceneSetPieceLayer areaId={areaId} />
       <SampleEntities areaId={areaId} />
+      <EditableNpcLayer areaId={areaId} />
 
       {(area?.connectedAreaIds ?? []).map((targetId) => {
         const g = edgeGate(targetId);

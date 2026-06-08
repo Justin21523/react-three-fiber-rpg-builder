@@ -3,12 +3,14 @@ import { useUiStore } from '../stores/uiStore';
 import { useWorldClockStore, formatClock } from '../stores/worldClockStore';
 import { useAudioStore } from '../stores/audioStore';
 import { EnvironmentEditorPanel } from './editor/EnvironmentEditorPanel';
+import { NpcEditorTab } from './editor/NpcEditorTab';
 import { EditAssetPalette } from './EditAssetPalette';
 
-type Tab = 'assets' | 'environment' | 'sim';
+type Tab = 'assets' | 'environment' | 'npc' | 'sim';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'assets', label: '🧊 Assets' },
   { id: 'environment', label: '🌤 Environment' },
+  { id: 'npc', label: '🧑 NPC / Dialogue' },
   { id: 'sim', label: '🕓 World' },
 ];
 
@@ -78,7 +80,7 @@ export const EditorHubPanel = () => {
       </div>
       <div className="relative min-w-0 flex-1 overflow-auto p-4 pr-10">
         <button onClick={close} aria-label="Close" className="absolute right-3 top-3 z-10 rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white">✕</button>
-        {tab === 'assets' ? <EditAssetPalette /> : tab === 'environment' ? <EnvironmentEditorPanel /> : <SimTab />}
+        {tab === 'assets' ? <EditAssetPalette /> : tab === 'environment' ? <EnvironmentEditorPanel /> : tab === 'npc' ? <NpcEditorTab /> : <SimTab />}
       </div>
     </div>
   );

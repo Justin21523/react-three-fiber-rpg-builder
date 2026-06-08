@@ -1,3 +1,5 @@
+import { getEditorNpc } from '../stores/editorNpcStore';
+
 // Kit — sample NPC profiles. An NPC is a labelled, talkable entity bound to a dialogue tree. Give it a
 // `modelAssetId` (an id from the auto-discovered model library) to render your own GLB instead of the
 // default colored capsule.
@@ -14,5 +16,6 @@ export const SEED_NPCS: NpcProfile[] = [
 ];
 
 export function getNpcProfile(id: string): NpcProfile | undefined {
-  return SEED_NPCS.find((n) => n.id === id);
+  // Editor-authored NPCs (created in the 🧑 NPC tab) win over seed NPCs.
+  return getEditorNpc(id) ?? SEED_NPCS.find((n) => n.id === id);
 }
