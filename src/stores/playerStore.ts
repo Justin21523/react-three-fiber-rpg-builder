@@ -14,7 +14,7 @@ export interface PlayerState {
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   position: null,
-  currentAreaId: 'area_central_courtyard',
+  currentAreaId: 'area_field',
   spawnRequest: null,
   distanceTraveled: 0,
   setPosition: (pos) => {
