@@ -21,7 +21,7 @@ import { DialogueBox } from './ui/DialogueBox';
 import { QuestTracker } from './ui/QuestTracker';
 import { BattleOverlay } from './ui/BattleOverlay';
 import { useBattleStore } from './stores/battleStore';
-import { ActivityOverlay } from './ui/ActivityOverlay';
+import { ActivityHud } from './ui/ActivityHud';
 import { useActivityStore } from './stores/activityStore';
 
 // Kit — top-level: the 3D <Canvas> with DOM overlays layered over it. F1 toggles Edit Mode; in Edit
@@ -81,7 +81,7 @@ export const App = () => {
       {!editMode && !inBattle && !inActivity && <QuestTracker />}
       <DialogueBox />
       <BattleOverlay />
-      <ActivityOverlay />
+      <ActivityHud />
       {/* Edit Mode: independent panels — Assets (left-centre), Inspector (top-left), terrain palette, and
           the centred draggable Hub — matching the original layout. */}
       {editMode && <EditAssetPalette />}

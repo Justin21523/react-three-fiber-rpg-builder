@@ -102,7 +102,7 @@ export const TriggerInspector = ({ trigger }: { trigger: EditorTrigger }) => {
       )}
       {t.triggerType === 'activityTrigger' && (
         <div className="grid grid-cols-2 gap-2 rounded border border-emerald-700/30 bg-emerald-950/20 p-2">
-          <Field label="activityId (mini-game)"><IdSelect value={activityConfig(t).activityId} onChange={(v) => set({ activity: { ...activityConfig(t), activityId: v } })} options={activities.map((a) => ({ id: a.id, label: a.name }))} placeholder="(choose mini-game)" /></Field>
+          <Field label="activityId (mini-game)"><IdSelect value={activityConfig(t).activityId} onChange={(v) => set({ activity: { ...activityConfig(t), activityId: v } })} options={activities.map((a) => ({ id: a.def.id, label: a.def.title }))} placeholder="(choose mini-game)" /></Field>
         </div>
       )}
 

@@ -47,7 +47,7 @@ export const QuestObjectiveEditor = ({ questId, obj, index, count }: { questId: 
         ...combatants.map((c) => ({ id: c.id, label: c.name })),
         ...SEED_COMBATANTS.map((c) => ({ id: c.id, label: `${c.name} (seed)` })),
       ];
-      case 'activity': return [...activities.map((a) => ({ id: a.id, label: a.name })), ...SEED_ACTIVITIES.map((a) => ({ id: a.id, label: `${a.name} (seed)` }))];
+      case 'activity': return [...activities.map((a) => ({ id: a.def.id, label: a.def.title })), ...SEED_ACTIVITIES.map((a) => ({ id: a.def.id, label: `${a.def.title} (seed)` }))];
       default: return null; // trigger / none → free text for now
     }
   }, [kind, npcOptions, itemOptions, areaOptions, combatants, encounters, activities]);

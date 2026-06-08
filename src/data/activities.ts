@@ -1,14 +1,32 @@
-import type { ActivityDefinition } from '../types/activity';
+import type { EditorActivity } from '../types/activity';
+import { createDefaultActivity } from '../types/activity';
 import { getEditorActivity } from '../stores/editorActivityStore';
 
-// Kit — sample mini-games (one per type). Author your own in the 🎮 Mini-games tab.
-export const SEED_ACTIVITIES: ActivityDefinition[] = [
-  { id: 'act_reaction', name: 'Quick Reflex', type: 'reaction', description: 'Click the instant it turns green.', durationSec: 5, targetScore: 1, reward: { exp: 20 } },
-  { id: 'act_clicker', name: 'Bug Squash', type: 'clicker', description: 'Click as many targets as you can!', durationSec: 10, targetScore: 8, reward: { items: [{ itemId: 'item_herb', quantity: 1 }], exp: 30 } },
-  { id: 'act_memory', name: 'Echo', type: 'memory', description: 'Repeat the growing colour sequence.', durationSec: 30, targetScore: 4, reward: { exp: 40, flags: ['memory_master'] } },
-];
+// Kit — sample mini-games. Each is a full EditorActivity (mode + arena + participants + objectives +
+// rewards + per-mode config) built from createDefaultActivity, then lightly customised. Author your own
+// in the 🎮 Mini-games tab. getActivity(id) resolves editor-authored ones first, then these seeds.
+const sampleRace = (): EditorActivity => {
+  const ea = createDefaultActivity('area_field', 'race');
+  ea.def.id = 'act_race_demo';
+  ea.def.title = 'Courtyard Dash';
+  ea.def.description = 'Reach the finish line before time runs out.';
+  ea.code = 'act_race_demo';
+  return ea;
+};
 
-export function getActivity(id: string | undefined): ActivityDefinition | undefined {
+const sampleRush = (): EditorActivity => {
+  const ea = createDefaultActivity('area_field', 'enemyRush');
+  ea.def.id = 'act_rush_demo';
+  ea.def.title = 'Spirit Swarm';
+  ea.def.description = 'Defeat as many foes as you can before the timer ends.';
+  ea.code = 'act_rush_demo';
+  if (ea.rushConfig) ea.rushConfig.combatantIds = ['cb_slime'];
+  return ea;
+};
+
+export const SEED_ACTIVITIES: EditorActivity[] = [sampleRace(), sampleRush()];
+
+export function getActivity(id: string | undefined): EditorActivity | undefined {
   if (!id) return undefined;
-  return getEditorActivity(id) ?? SEED_ACTIVITIES.find((a) => a.id === id);
+  return getEditorActivity(id) ?? SEED_ACTIVITIES.find((a) => a.def.id === id);
 }
