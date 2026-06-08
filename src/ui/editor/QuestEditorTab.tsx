@@ -44,7 +44,7 @@ export const QuestEditorTab = () => {
           <label className="flex items-center gap-2">Giver NPC
             <select className={`flex-1 ${inp}`} value={sel.giverNpcId ?? ''} onChange={(e) => save({ ...sel, giverNpcId: e.target.value || undefined })}>
               <option value="">(none)</option>
-              {npcs.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+              {npcs.map((n) => <option key={n.id} value={n.id}>{n.displayName}</option>)}
             </select>
           </label>
 

@@ -9,7 +9,9 @@ export function getDialogueTree(id: string | null | undefined): DialogueTree | u
   return getEditorDialogueTree(id) ?? SEED_DIALOGUES.find((t) => t.id === id);
 }
 
-export function listDialogueTreeIds(): string[] {
-  const editor = Object.keys(useEditorNpcStore.getState().dialogueTrees);
-  return [...new Set([...editor, ...SEED_DIALOGUES.map((t) => t.id)])];
+export function listDialogueTreeIds(): { id: string; source: 'editor' | 'seed' }[] {
+  const editor = Object.keys(useEditorNpcStore.getState().dialogueTrees).map((id) => ({ id, source: 'editor' as const }));
+  const seedIds = new Set(editor.map((e) => e.id));
+  const seed = SEED_DIALOGUES.filter((t) => !seedIds.has(t.id)).map((t) => ({ id: t.id, source: 'seed' as const }));
+  return [...editor, ...seed];
 }

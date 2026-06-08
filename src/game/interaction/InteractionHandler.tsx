@@ -9,6 +9,7 @@ import { useDoorStore } from '../../stores/doorStore';
 import { useFlagStore } from '../../stores/flagStore';
 import { getKitArea } from '../../data/areas';
 import { getNpcProfile } from '../../data/npcs';
+import { getEditorNpc } from '../../stores/editorNpcStore';
 import { getDoorDef } from '../../data/doors';
 import { getAreaEntities } from '../../data/areaEntities';
 import { arrivalSpawn } from '../world/gateLayout';
@@ -44,6 +45,19 @@ export const InteractionHandler = () => {
       if (targetType === 'npc') {
         useFlagStore.getState().setFlag(`npc_talked_${currentTargetId}`);
         const npc = getNpcProfile(currentTargetId);
+        // Editor NPCs can offer / accept quests via their startsQuestIds / completesQuestIds bindings.
+        const enpc = getEditorNpc(currentTargetId);
+        if (enpc) {
+          const qs = useQuestStore.getState();
+          const completable = (enpc.completesQuestIds ?? [])
+            .map((id) => qs.getQuestById(id))
+            .find((q) => q && q.status === 'InProgress' && q.objectives.every((o) => o.isCompleted));
+          if (completable) { qs.completeQuest(completable.id); }
+          const startable = (enpc.startsQuestIds ?? [])
+            .map((id) => qs.getQuestById(id))
+            .find((q) => q && q.status === 'NotStarted');
+          if (startable) { qs.startQuest(startable.id); }
+        }
         if (npc?.dialogueTreeId) useDialogueStore.getState().startDialogue(npc.dialogueTreeId);
         return;
       }

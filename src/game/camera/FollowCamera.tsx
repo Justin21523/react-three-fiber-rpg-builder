@@ -1,7 +1,7 @@
 import { OrbitControls } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
-import { Vector3 } from 'three';
+import { MOUSE, Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -27,6 +27,8 @@ export const FollowCamera = () => {
   // normal cursor-drag orbit. We drive our own spherical angles around the follow target;
   // on exit OrbitControls re-reads the camera pose so there's no jump.
   const [pointerLook, setPointerLook] = useState(false);
+  // Hold Shift → left-drag pans the camera (instead of orbiting); release → back to orbit.
+  const [shiftPan, setShiftPan] = useState(false);
   const yaw = useRef(0);     // azimuth (matches OrbitControls.getAzimuthalAngle)
   const pitch = useRef(1.0); // polar   (matches OrbitControls.getPolarAngle)
   const dist = useRef(8);
@@ -54,13 +56,18 @@ export const FollowCamera = () => {
       yaw.current -= e.movementX * LOOK_SENSITIVITY;
       pitch.current = Math.max(0.2, Math.min(Math.PI - 0.2, pitch.current + e.movementY * LOOK_SENSITIVITY));
     };
+    const onShift = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftPan(e.type === 'keydown'); };
     dom.addEventListener('dblclick', onDblClick);
     document.addEventListener('pointerlockchange', onLockChange);
     document.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('keydown', onShift);
+    window.addEventListener('keyup', onShift);
     return () => {
       dom.removeEventListener('dblclick', onDblClick);
       document.removeEventListener('pointerlockchange', onLockChange);
       document.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('keydown', onShift);
+      window.removeEventListener('keyup', onShift);
     };
   }, [gl]);
 
@@ -116,6 +123,9 @@ export const FollowCamera = () => {
       maxDistance={editMode ? Infinity : 16}
       enablePan={editMode}
       enableRotate={!(editMode && terrainTool !== 'none') || terrainShiftHeld}
+      // Left-drag orbits in Edit Mode; hold Shift → left-drag pans the camera. Right-drag always pans,
+      // middle dollies. (A plain left-click still selects an object.)
+      mouseButtons={{ LEFT: shiftPan ? MOUSE.PAN : MOUSE.ROTATE, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }}
       enableDamping
       dampingFactor={0.1}
     />

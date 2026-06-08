@@ -1,35 +1,49 @@
 import { create } from 'zustand';
-import type { NpcProfile } from '../data/npcs';
 import type { DialogueTree } from '../types/dialogue';
+import type { EditorNpc } from '../types/editorNPC';
+import { createDefaultEditorNpc } from '../types/editorNPC';
 
 // Kit — in-editor NPC + dialogue authoring. NPCs created here are placed per-area and merged into the
-// runtime via getNpcProfile / area rendering; dialogue trees authored here are merged into
-// getDialogueTree. Persisted to localStorage so your edits survive reload. Generic (no yokai bindings).
-export interface EditorNpc extends NpcProfile {
-  areaId: string;
-  position: [number, number, number];
-}
+// runtime via getNpcProfile / EditableNpcLayer; dialogue trees authored here merge into getDialogueTree.
+// Persisted to localStorage with a tolerant loader (old simple {name,...} shape still loads).
 
 interface EditorNpcState {
   addedNpcs: EditorNpc[];
-  dialogueTrees: Record<string, DialogueTree>; // id → authored/overridden tree
+  dialogueTrees: Record<string, DialogueTree>;
   addNpc: (areaId: string, position?: [number, number, number]) => string;
   updateNpc: (id: string, patch: Partial<EditorNpc>) => void;
   removeNpc: (id: string) => void;
+  createDialogueTree: (speakerName: string) => string;
   setDialogueTree: (tree: DialogueTree) => void;
   removeDialogueTree: (id: string) => void;
-  load: (data: { addedNpcs?: EditorNpc[]; dialogueTrees?: Record<string, DialogueTree> }) => void;
+  importState: (data: { addedNpcs?: EditorNpc[]; dialogueTrees?: Record<string, DialogueTree> }) => void;
   reset: () => void;
 }
 
 const STORAGE_KEY = 'r3f-rpg-builder-editor-npc-v1';
 
 function persist(s: Pick<EditorNpcState, 'addedNpcs' | 'dialogueTrees'>): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ addedNpcs: s.addedNpcs, dialogueTrees: s.dialogueTrees }));
-  } catch {
-    /* ignore */
-  }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ addedNpcs: s.addedNpcs, dialogueTrees: s.dialogueTrees })); } catch { /* ignore */ }
+}
+
+// Tolerant migration: accept both the new EditorNpc shape and the early kit shape ({ name, ... }).
+function migrateNpc(raw: Record<string, unknown>): EditorNpc {
+  const base = createDefaultEditorNpc(
+    (raw.id as string) ?? `npc_${Date.now().toString(36)}`,
+    (raw.areaId as string) ?? 'area_field',
+    (raw.position as [number, number, number]) ?? [0, 1, 0],
+  );
+  return {
+    ...base,
+    ...raw,
+    displayName: (raw.displayName as string) ?? (raw.name as string) ?? base.displayName,
+    relatedQuestIds: (raw.relatedQuestIds as string[]) ?? [],
+    tags: (raw.tags as string[]) ?? [],
+    color: (raw.color as string) ?? base.color,
+    modelAssetId: (raw.modelAssetId as string | null) ?? null,
+    dialogueTreeId: (raw.dialogueTreeId as string | null) ?? null,
+    interactionLabel: (raw.interactionLabel as string) ?? base.interactionLabel,
+  } as EditorNpc;
 }
 
 function load(): { addedNpcs: EditorNpc[]; dialogueTrees: Record<string, DialogueTree> } {
@@ -37,11 +51,17 @@ function load(): { addedNpcs: EditorNpc[]; dialogueTrees: Record<string, Dialogu
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { addedNpcs: [], dialogueTrees: {} };
     const p = JSON.parse(raw);
-    return { addedNpcs: p.addedNpcs ?? [], dialogueTrees: p.dialogueTrees ?? {} };
+    const addedNpcs = Array.isArray(p.addedNpcs) ? p.addedNpcs.map(migrateNpc) : [];
+    return { addedNpcs, dialogueTrees: p.dialogueTrees ?? {} };
   } catch {
     return { addedNpcs: [], dialogueTrees: {} };
   }
 }
+
+const defaultTree = (id: string, speaker: string): DialogueTree => ({
+  id, rootNodeId: 'start',
+  nodes: { start: { id: 'start', speaker, text: 'Hello, traveller.', nextNodeId: null } },
+});
 
 export const useEditorNpcStore = create<EditorNpcState>((set, get) => ({
   ...load(),
@@ -49,14 +69,9 @@ export const useEditorNpcStore = create<EditorNpcState>((set, get) => ({
   addNpc: (areaId, position = [0, 1, 0]) => {
     const id = `npc_${Date.now().toString(36)}`;
     const treeId = `dlg_${id}`;
-    const npc: EditorNpc = { id, name: 'New NPC', dialogueTreeId: treeId, color: '#38bdf8', areaId, position };
-    const tree: DialogueTree = {
-      id: treeId,
-      rootNodeId: 'start',
-      nodes: { start: { id: 'start', speaker: 'New NPC', text: 'Hello, traveller.', nextNodeId: null } },
-    };
+    const npc = { ...createDefaultEditorNpc(id, areaId, position), dialogueTreeId: treeId };
     const addedNpcs = [...get().addedNpcs, npc];
-    const dialogueTrees = { ...get().dialogueTrees, [treeId]: tree };
+    const dialogueTrees = { ...get().dialogueTrees, [treeId]: defaultTree(treeId, npc.displayName) };
     set({ addedNpcs, dialogueTrees });
     persist({ addedNpcs, dialogueTrees });
     return id;
@@ -74,6 +89,14 @@ export const useEditorNpcStore = create<EditorNpcState>((set, get) => ({
     persist({ addedNpcs, dialogueTrees: get().dialogueTrees });
   },
 
+  createDialogueTree: (speakerName) => {
+    const id = `dlg_${Date.now().toString(36)}`;
+    const dialogueTrees = { ...get().dialogueTrees, [id]: defaultTree(id, speakerName || 'NPC') };
+    set({ dialogueTrees });
+    persist({ addedNpcs: get().addedNpcs, dialogueTrees });
+    return id;
+  },
+
   setDialogueTree: (tree) => {
     const dialogueTrees = { ...get().dialogueTrees, [tree.id]: tree };
     set({ dialogueTrees });
@@ -87,16 +110,13 @@ export const useEditorNpcStore = create<EditorNpcState>((set, get) => ({
     persist({ addedNpcs: get().addedNpcs, dialogueTrees });
   },
 
-  load: (data) => {
-    const next = { addedNpcs: data.addedNpcs ?? [], dialogueTrees: data.dialogueTrees ?? {} };
+  importState: (data) => {
+    const next = { addedNpcs: (data.addedNpcs ?? []).map((n) => migrateNpc(n as unknown as Record<string, unknown>)), dialogueTrees: data.dialogueTrees ?? {} };
     set(next);
     persist(next);
   },
 
-  reset: () => {
-    set({ addedNpcs: [], dialogueTrees: {} });
-    persist({ addedNpcs: [], dialogueTrees: {} });
-  },
+  reset: () => { set({ addedNpcs: [], dialogueTrees: {} }); persist({ addedNpcs: [], dialogueTrees: {} }); },
 }));
 
 // Non-hook accessors for data modules (avoid store→store import cycles).

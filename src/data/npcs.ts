@@ -16,6 +16,8 @@ export const SEED_NPCS: NpcProfile[] = [
 ];
 
 export function getNpcProfile(id: string): NpcProfile | undefined {
-  // Editor-authored NPCs (created in the 🧑 NPC tab) win over seed NPCs.
-  return getEditorNpc(id) ?? SEED_NPCS.find((n) => n.id === id);
+  // Editor-authored NPCs (created in the 🧑 NPC tab) win over seed NPCs; map EditorNpc → NpcProfile.
+  const ed = getEditorNpc(id);
+  if (ed) return { id: ed.id, name: ed.displayName, dialogueTreeId: ed.dialogueTreeId ?? undefined, modelAssetId: ed.modelAssetId ?? undefined, color: ed.color };
+  return SEED_NPCS.find((n) => n.id === id);
 }
