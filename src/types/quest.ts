@@ -8,6 +8,9 @@ export interface QuestObjective {
   id: string;
   description: string;
   isCompleted: boolean;
+  // Optional auto-tracking hint (from the Quest editor): the generic tracker flips isCompleted when the
+  // matching live store signal is satisfied (e.g. collectItem → inventory has `count` of `targetId`).
+  track?: { type: string; targetId?: string; count?: number };
 }
 
 export interface QuestReward {

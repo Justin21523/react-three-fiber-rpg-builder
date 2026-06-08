@@ -7,7 +7,8 @@ import { usePbrPatchEditStore } from './stores/pbrPatchEditStore';
 import { useEditorEnvironmentStore } from './stores/editorEnvironmentStore';
 import { usePlayerStore } from './stores/playerStore';
 import { Scene } from './game/core/Scene';
-import { syncEditorQuests } from './stores/editorQuestStore';
+import { syncEditorQuests } from './game/editor/editorQuestToQuest';
+import { QuestTrackerController } from './game/quest/questTracking';
 import { InteractionHandler } from './game/interaction/InteractionHandler';
 import { Dock } from './ui/Dock';
 import { EditorHubPanel } from './ui/EditorHubPanel';
@@ -66,6 +67,7 @@ export const App = () => {
   return (
     <div className="fixed inset-0 bg-gray-900">
       <InteractionHandler />
+      <QuestTrackerController />
       <Dock />
       <WorldClockHUD />
       {/* Overworld-only HUD (hidden while editing). */}
