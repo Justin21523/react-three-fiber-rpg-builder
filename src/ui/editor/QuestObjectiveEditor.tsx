@@ -4,17 +4,11 @@ import { EDITOR_OBJECTIVE_TYPES } from '../../types/editorQuest';
 import { useEditorQuestStore } from '../../stores/editorQuestStore';
 import { SEED_DOORS } from '../../data/doors';
 import { SEED_AREAS } from '../../data/areas';
-import { MODEL_ASSETS, MODEL_CATEGORIES } from '../../data/modelLibrary';
 import { editorSpawn } from '../../stores/sceneEditStore';
 import { Field, inp, lbl, useNpcOptions, useItemOptions, useAreaOptions } from './editorShared';
 import { IdSelect, type IdOption } from './idPickers';
-
-const COMMON_ANIMATIONS = ['idle', 'walk', 'run', 'attack', 'wave'];
-const MODEL_GROUPS = (() => {
-  const byCat: Record<string, string[]> = {};
-  for (const [id, a] of Object.entries(MODEL_ASSETS)) (byCat[a.category] ??= []).push(id);
-  return MODEL_CATEGORIES.filter((c) => byCat[c]?.length).map((c) => ({ cat: c, ids: byCat[c].sort() }));
-})();
+import { ModelPicker } from './ModelPicker';
+import { AnimationPicker } from './AnimationPicker';
 
 // Which id source seeds the target picker for each objective type.
 const TARGET_KIND: Record<EditorObjectiveType, 'npc' | 'item' | 'area' | 'door' | 'trigger' | 'none'> = {
@@ -93,17 +87,8 @@ export const QuestObjectiveEditor = ({ questId, obj, index, count }: { questId: 
       </div>
       {/* marker appearance */}
       <div className="grid grid-cols-3 gap-2">
-        <Field label="marker model">
-          <select value={obj.markerModelAssetId ?? ''} onChange={(e) => set({ markerModelAssetId: e.target.value || undefined })} className={inp}>
-            <option value="">(diamond marker)</option>
-            {MODEL_GROUPS.map((g) => <optgroup key={g.cat} label={g.cat}>{g.ids.map((id) => <option key={id} value={id}>{MODEL_ASSETS[id]?.label ?? id}</option>)}</optgroup>)}
-          </select>
-        </Field>
-        <Field label="marker animation">
-          <select value={obj.markerAnimation ?? 'idle'} onChange={(e) => set({ markerAnimation: e.target.value })} disabled={!obj.markerModelAssetId} className={inp}>
-            {COMMON_ANIMATIONS.map((an) => <option key={an} value={an}>{an}</option>)}
-          </select>
-        </Field>
+        <Field label="marker model"><ModelPicker value={obj.markerModelAssetId} onChange={(v) => set({ markerModelAssetId: v })} noneLabel="(diamond marker)" /></Field>
+        <Field label="marker animation"><AnimationPicker modelAssetId={obj.markerModelAssetId} value={obj.markerAnimation} onChange={(v) => set({ markerAnimation: v })} /></Field>
         <Field label="marker color"><input type="color" value={obj.markerColor ?? '#fbbf24'} onChange={(e) => set({ markerColor: e.target.value })} className="h-7 w-full rounded bg-slate-800" /></Field>
       </div>
     </div>

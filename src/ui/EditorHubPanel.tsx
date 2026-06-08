@@ -5,13 +5,15 @@ import { useAudioStore } from '../stores/audioStore';
 import { EnvironmentEditorPanel } from './editor/EnvironmentEditorPanel';
 import { NpcEditorTab } from './editor/NpcEditorTab';
 import { QuestEditorTab } from './editor/QuestEditorTab';
+import { TriggerEditorTab } from './editor/TriggerEditorTab';
 
 // Assets is a SEPARATE panel (left-centre) — not a hub tab — to match the original layout.
-type Tab = 'environment' | 'npc' | 'quest' | 'sim';
+type Tab = 'trigger' | 'npc' | 'quest' | 'environment' | 'sim';
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'environment', label: '🌤 Environment' },
+  { id: 'trigger', label: '⚡ Triggers' },
   { id: 'npc', label: '🧑 NPC / Dialogue' },
   { id: 'quest', label: '📜 Quest / Item' },
+  { id: 'environment', label: '🌤 Environment' },
   { id: 'sim', label: '🕓 World' },
 ];
 
@@ -95,7 +97,7 @@ export const EditorHubPanel = () => {
       </div>
       <div className="relative min-w-0 flex-1 overflow-auto p-4 pr-10">
         <button onClick={close} aria-label="Close" className="absolute right-3 top-3 z-10 rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white">✕</button>
-        {tab === 'environment' ? <EnvironmentEditorPanel /> : tab === 'npc' ? <NpcEditorTab /> : tab === 'quest' ? <QuestEditorTab /> : <SimTab />}
+        {tab === 'trigger' ? <TriggerEditorTab /> : tab === 'npc' ? <NpcEditorTab /> : tab === 'quest' ? <QuestEditorTab /> : tab === 'environment' ? <EnvironmentEditorPanel /> : <SimTab />}
       </div>
     </div>
   );

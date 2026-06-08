@@ -12,6 +12,8 @@ import { getNpcProfile } from '../../data/npcs';
 import { getEditorNpc } from '../../stores/editorNpcStore';
 import { getDoorDef } from '../../data/doors';
 import { getAreaEntities } from '../../data/areaEntities';
+import { getEditorTrigger } from '../../stores/editorTriggerStore';
+import { fireEditorTrigger } from '../editor/fireEditorTrigger';
 import { arrivalSpawn } from '../world/gateLayout';
 import { executeEffect } from '../executeEffect';
 
@@ -67,6 +69,12 @@ export const InteractionHandler = () => {
         useInventoryStore.getState().markPickedUp(currentTargetId);
         interaction.clearTarget(currentTargetId);
         getAreaEntities(areaId)?.items?.find((p) => p.itemId === currentTargetId)?.onPickupEffects?.forEach(executeEffect);
+        return;
+      }
+
+      if (targetType === 'editorTrigger') {
+        fireEditorTrigger(getEditorTrigger(currentTargetId));
+        interaction.clearTarget(currentTargetId);
         return;
       }
 

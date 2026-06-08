@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { EditorNpc, NpcType } from '../../types/editorNPC';
 import { NPC_TYPES, NPC_TYPE_LABEL, NPC_TYPE_COLOR } from '../../types/editorNPC';
-import { MODEL_ASSETS, MODEL_CATEGORIES } from '../../data/modelLibrary';
 import { useEditorNpcStore } from '../../stores/editorNpcStore';
 import { useDialogueStore } from '../../stores/dialogueStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -10,10 +9,10 @@ import { editorSpawn } from '../../stores/sceneEditStore';
 import { validateNpcLive } from '../../game/editor/validateNpc';
 import { Field, inp, lbl, csv, parseCsv, useQuestOptions } from './editorShared';
 import { IdMultiPicker } from './idPickers';
+import { ModelPicker } from './ModelPicker';
+import { AnimationPicker } from './AnimationPicker';
 import { DialogueTreeEditor } from './DialogueTreeEditor';
 import { DialoguePreviewPanel } from './DialoguePreviewPanel';
-
-const COMMON_ANIMATIONS = ['idle', 'walk', 'run', 'attack', 'wave', 'talk'];
 
 const Vec3Row = ({ label, value, step, onChange }: { label: string; value: [number, number, number]; step?: number; onChange: (v: [number, number, number]) => void }) => (
   <div>
@@ -39,11 +38,6 @@ export const NPCInspector = ({ npc }: { npc: EditorNpc }) => {
 
   const set = (patch: Partial<EditorNpc>) => updateNpc(npc.id, patch);
   const valid = validateNpcLive(npc);
-  const modelGroups = useMemo(() => {
-    const byCat: Record<string, string[]> = {};
-    for (const [id, a] of Object.entries(MODEL_ASSETS)) (byCat[a.category] ??= []).push(id);
-    return MODEL_CATEGORIES.filter((c) => byCat[c]?.length).map((c) => ({ cat: c, ids: byCat[c].sort() }));
-  }, []);
   const questOptions = useQuestOptions();
   const treeIsEditor = !!(npc.dialogueTreeId && dialogueTrees[npc.dialogueTreeId]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,17 +85,8 @@ export const NPCInspector = ({ npc }: { npc: EditorNpc }) => {
             <Field label="zoneId (area)"><input value={npc.areaId} disabled className={`${inp} opacity-60`} /></Field>
             <Field label="interactionLabel"><input value={npc.interactionLabel} onChange={(e) => set({ interactionLabel: e.target.value })} className={inp} /></Field>
             <Field label="color"><input type="color" value={npc.color} onChange={(e) => set({ color: e.target.value })} className="h-7 w-full rounded bg-slate-800" /></Field>
-            <Field label="model (3D character — empty = stub)">
-              <select value={npc.modelAssetId ?? ''} onChange={(e) => set({ modelAssetId: e.target.value || null })} className={inp}>
-                <option value="">(capsule stub)</option>
-                {modelGroups.map((g) => (
-                  <optgroup key={g.cat} label={g.cat}>
-                    {g.ids.map((id) => <option key={id} value={id}>{MODEL_ASSETS[id]?.label ?? id}</option>)}
-                  </optgroup>
-                ))}
-              </select>
-            </Field>
-            <Field label="animation"><select value={npc.animation ?? 'idle'} onChange={(e) => set({ animation: e.target.value })} disabled={!npc.modelAssetId} className={inp}>{COMMON_ANIMATIONS.map((an) => <option key={an} value={an}>{an}</option>)}</select></Field>
+            <Field label="model (3D character — empty = stub)"><ModelPicker value={npc.modelAssetId ?? undefined} onChange={(v) => set({ modelAssetId: v ?? null })} noneLabel="(capsule stub)" /></Field>
+            <Field label="animation"><AnimationPicker modelAssetId={npc.modelAssetId ?? undefined} value={npc.animation} onChange={(v) => set({ animation: v })} /></Field>
             <Field label="description"><input value={npc.description ?? ''} onChange={(e) => set({ description: e.target.value })} className={`col-span-2 ${inp}`} /></Field>
           </div>
 

@@ -7,6 +7,7 @@ import { SEED_NPCS } from '../../data/npcs';
 import { useQuestStore } from '../../stores/questStore';
 import { useEditorQuestStore } from '../../stores/editorQuestStore';
 import { useEditorNpcStore } from '../../stores/editorNpcStore';
+import { listDialogueTreeIds } from '../../game/dialogue/dialogueRegistry';
 import type { IdOption } from './idPickers';
 
 // Kit — shared form bits for the editor sub-panels (keeps each editor small). Ported from the original
@@ -62,4 +63,10 @@ export function useNpcOptions(): IdOption[] {
     const seen = new Set<string>();
     return [...ed, ...seed].filter((o) => (seen.has(o.id) ? false : (seen.add(o.id), true)));
   }, [editorNpcs]);
+}
+
+export function useDialogueOptions(): IdOption[] {
+  const trees = useEditorNpcStore((s) => s.dialogueTrees); // re-list when editor trees change
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- listDialogueTreeIds reads the store via getState; re-run on `trees`
+  return useMemo(() => listDialogueTreeIds().map((t) => ({ id: t.id, label: t.source === 'editor' ? `✎ ${t.id}` : t.id })), [trees]);
 }
