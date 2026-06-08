@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Combatant } from '../types/combat';
 import type { EditorEncounter } from '../types/editorEncounter';
 import { createDefaultEncounter } from '../types/editorEncounter';
+import { editorSpawn } from './sceneEditStore';
 import { useInventoryStore } from './inventoryStore';
 import { useProgressionStore } from './progressionStore';
 import { useFlagStore } from './flagStore';
@@ -43,7 +44,10 @@ export const useEditorEncounterStore = create<EditorEncounterState>((set, get) =
 
   addEncounter: (zoneId) => {
     const id = `enc_${Date.now().toString(36)}`;
-    const encounters = [...get().encounters, createDefaultEncounter(id, zoneId)];
+    const enc = createDefaultEncounter(id, zoneId);
+    // Spawn the encounter group at the camera focus point so its enemy models appear right in view.
+    enc.position = [editorSpawn.x, editorSpawn.y, editorSpawn.z];
+    const encounters = [...get().encounters, enc];
     set({ encounters, selectedId: id }); persist({ encounters, combatants: get().combatants });
     return id;
   },

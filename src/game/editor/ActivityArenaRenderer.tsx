@@ -5,7 +5,7 @@ import { getCombatant } from '../../data/combatants';
 import type { ActivityParticipantSlot, ArenaPointField, EditorActivity, Vec3Tuple } from '../../types/activity';
 import { ACTIVITY_SLOT_COLOR, ARENA_POINT_COLOR, ARENA_POINT_LABEL } from '../../types/activity';
 import { DataBackedPlacement } from '../edit/DataBackedPlacement';
-import { AnimatedGlbModel } from '../world/AnimatedGlbModel';
+import { SceneGlbModel } from '../world/SceneGlbModel';
 
 // Kit — authoring visuals for the SELECTED activity in the current area: each participant (animated model /
 // capsule) and each arena point is a DataBackedPlacement — click in the viewport or press 📍 to select,
@@ -41,7 +41,7 @@ const ParticipantVisual = ({ ea, slot, index }: { ea: EditorActivity; slot: Acti
   return (
     <DataBackedPlacement objKey={`act:${ea.def.id}:p:${index}`} position={slot.position} color={color}
       onMove={(pos) => useEditorActivityStore.getState().updateParticipant(index, { position: pos })}>
-      {model ? <AnimatedGlbModel assetId={model} animation={slot.animation} fallback={<Capsule color={color} />} /> : <Capsule color={color} />}
+      {model ? <SceneGlbModel assetId={model} fallback={<Capsule color={color} />} /> : <Capsule color={color} />}
       <Text position={[0, 2, 0]} fontSize={0.3} color={color} anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#000">{`${slot.role}: ${name}`}</Text>
     </DataBackedPlacement>
   );

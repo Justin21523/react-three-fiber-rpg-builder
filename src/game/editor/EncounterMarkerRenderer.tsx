@@ -4,7 +4,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { getCombatant } from '../../data/combatants';
 import type { EditorEncounter, EditorEnemySlot } from '../../types/editorEncounter';
 import { DataBackedPlacement } from '../edit/DataBackedPlacement';
-import { AnimatedGlbModel } from '../world/AnimatedGlbModel';
+import { SceneGlbModel } from '../world/SceneGlbModel';
 
 // Kit — authoring visuals for editor encounters in the current area: EVERY enemy slot's model (or a ⚔
 // banner) shown in the world at its position, each a DataBackedPlacement (click / 📍 then drag → writes
@@ -42,7 +42,7 @@ const SlotVisual = ({ enc, slot, index }: { enc: EditorEncounter; slot: EditorEn
   });
   return (
     <DataBackedPlacement objKey={`enc:${enc.id}:slot:${index}`} position={slot.position ?? spread(enc, index)} color={color} onMove={move}>
-      {model ? <AnimatedGlbModel assetId={model} fallback={<Banner color={color} />} /> : <Banner color={color} />}
+      {model ? <SceneGlbModel assetId={model} fallback={<Banner color={color} />} /> : <Banner color={color} />}
       <Text position={[0, 2.3, 0]} fontSize={0.28} color="#fca5a5" anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#000">{slot.isBoss ? '👑 ' : '⚔ '}{name} Lv{slot.level}</Text>
     </DataBackedPlacement>
   );

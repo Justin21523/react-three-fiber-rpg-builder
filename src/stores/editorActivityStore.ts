@@ -4,6 +4,7 @@ import type {
   ActivityType, ArenaPointField, EditorActivity, Vec3Tuple,
 } from '../types/activity';
 import { ACTIVITY_SLOT_COLOR, createDefaultActivity, objectiveTypeFor, SINGLE_POINT_FIELDS } from '../types/activity';
+import { editorSpawn } from './sceneEditStore';
 import { useInventoryStore } from './inventoryStore';
 import { useProgressionStore } from './progressionStore';
 import { useFlagStore } from './flagStore';
@@ -71,7 +72,9 @@ export const useEditorActivityStore = create<EditorActivityState>((set, get) => 
     const activities = get().activities.map((a) => (a.def.id === id ? fn(a) : a));
     set({ activities }); persist(activities);
   };
-  const defaultPos = (ea: EditorActivity): Vec3Tuple => [...ea.arena.bounds.center] as Vec3Tuple;
+  // New participants / arena points spawn at the camera focus point (like placed models/triggers), so they
+  // appear right where the user is looking — not at fixed world coords off-screen.
+  const defaultPos = (): Vec3Tuple => [editorSpawn.x, editorSpawn.y, editorSpawn.z];
 
   return {
     activities: load(),
@@ -80,6 +83,15 @@ export const useEditorActivityStore = create<EditorActivityState>((set, get) => 
 
     addActivity: (zoneId, type) => {
       const ea = createDefaultActivity(zoneId, type);
+      // Re-anchor the whole arena (bounds + points + participants) to the camera focus so it spawns in view.
+      const sp: Vec3Tuple = [editorSpawn.x, editorSpawn.y, editorSpawn.z];
+      const [cx, cy, cz] = ea.arena.bounds.center;
+      const shift = (p: Vec3Tuple): Vec3Tuple => [p[0] - cx + sp[0], p[1] - cy + sp[1], p[2] - cz + sp[2]];
+      ea.arena.bounds.center = sp;
+      for (const f of Object.keys(ea.arena.points) as (keyof typeof ea.arena.points)[]) {
+        ea.arena.points[f] = (ea.arena.points[f] ?? []).map(shift);
+      }
+      ea.participants = ea.participants.map((p) => ({ ...p, position: shift(p.position) }));
       const activities = [...get().activities, ea];
       set({ activities, selectedId: ea.def.id, selectedPoint: null }); persist(activities);
       return ea.def.id;
@@ -107,7 +119,7 @@ export const useEditorActivityStore = create<EditorActivityState>((set, get) => 
     addParticipant: (role) => mutate((ea) => {
       const slot: ActivityParticipantSlot = {
         id: `${ea.def.id}_p${ea.participants.length}_${Math.floor(Math.random() * 1e4)}`,
-        role, level: ea.def.recommendedLevel, color: ACTIVITY_SLOT_COLOR[role], position: defaultPos(ea),
+        role, level: ea.def.recommendedLevel, color: ACTIVITY_SLOT_COLOR[role], position: defaultPos(),
       };
       return { ...ea, participants: [...ea.participants, slot] };
     }),
@@ -119,7 +131,7 @@ export const useEditorActivityStore = create<EditorActivityState>((set, get) => 
     addPoint: (field) => mutate((ea) => {
       const cur = ea.arena.points[field] ?? [];
       if (SINGLE_POINT_FIELDS.has(field) && cur.length >= 1) return ea;
-      return { ...ea, arena: { ...ea.arena, points: { ...ea.arena.points, [field]: [...cur, defaultPos(ea)] } } };
+      return { ...ea, arena: { ...ea.arena, points: { ...ea.arena.points, [field]: [...cur, defaultPos()] } } };
     }),
     updatePoint: (field, index, pos) => mutate((ea) => ({
       ...ea, arena: { ...ea.arena, points: { ...ea.arena.points, [field]: (ea.arena.points[field] ?? []).map((p, i) => (i === index ? pos : p)) } },

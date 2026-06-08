@@ -6,7 +6,7 @@ import { useEditorQuestStore } from '../../stores/editorQuestStore';
 import { useQuestStore } from '../../stores/questStore';
 import { useUiStore } from '../../stores/uiStore';
 import { DataBackedPlacement } from '../edit/DataBackedPlacement';
-import { AnimatedGlbModel } from '../world/AnimatedGlbModel';
+import { SceneGlbModel } from '../world/SceneGlbModel';
 
 // Kit — renders editor quest objective markers (model or floating diamond) in the world. Edit Mode: each
 // is a DataBackedPlacement (click / 📍 then drag → writes back to the objective's markerPosition). Play
@@ -47,7 +47,7 @@ const Diamond = ({ color = '#fbbf24' }: { color?: string }) => {
 const QuestMarkerEntity = ({ marker, editMode }: { marker: Marker; editMode: boolean }) => {
   const visual = (
     <>
-      {marker.model ? <AnimatedGlbModel assetId={marker.model} animation={marker.animation} fallback={<Diamond color={marker.color} />} /> : <Diamond color={marker.color} />}
+      {marker.model ? <SceneGlbModel assetId={marker.model} fallback={<Diamond color={marker.color} />} /> : <Diamond color={marker.color} />}
       <Text position={[0, 2.1, 0]} fontSize={0.28} color="#fde68a" anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#000">{marker.label}</Text>
     </>
   );
