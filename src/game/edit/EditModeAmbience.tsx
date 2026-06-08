@@ -1,4 +1,3 @@
-import { useGraphicsSettingsStore } from '../../stores/graphicsSettingsStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useEditorEnvironmentStore } from '../../stores/editorEnvironmentStore';
 import { resolveAreaEnvironment, resolvedBackgroundColor } from '../environment/resolveAreaEnvironment';
@@ -10,7 +9,6 @@ import { EnvironmentBackdrop } from '../world/EnvironmentBackdrop';
 // Phase 98a — but we still render the area's chosen backdrop (Sky/gradient/solid + ground-catch) so
 // the sky can be previewed/tuned from the Environment hub while editing; bright lights stay.
 export const EditModeAmbience = () => {
-  const preset = useGraphicsSettingsStore((s) => s.preset)();
   const areaId = usePlayerStore((s) => s.currentAreaId);
   useEditorEnvironmentStore((s) => s.overrides);
   useEditorEnvironmentStore((s) => s.defaultMode);
@@ -21,21 +19,9 @@ export const EditModeAmbience = () => {
       <color attach="background" args={[bg]} />
       <hemisphereLight args={['#ffffff', '#9aa7b4', 1.0]} />
       <ambientLight color="#ffffff" intensity={1.15} />
-      <directionalLight
-        position={[24, 36, 18]}
-        color="#ffffff"
-        intensity={1.5}
-        castShadow={preset.shadows}
-        shadow-mapSize-width={preset.shadowMapSize}
-        shadow-mapSize-height={preset.shadowMapSize}
-        shadow-camera-near={1}
-        shadow-camera-far={160}
-        shadow-camera-left={-preset.shadowRadius}
-        shadow-camera-right={preset.shadowRadius}
-        shadow-camera-top={preset.shadowRadius}
-        shadow-camera-bottom={-preset.shadowRadius}
-        shadow-bias={-0.0005}
-      />
+      {/* No shadows while editing: it's a builder view, and the shadow pass would re-render every
+          placed model (which all render uncapped in Edit Mode) — a big, avoidable GPU cost. */}
+      <directionalLight position={[24, 36, 18]} color="#ffffff" intensity={1.5} castShadow={false} />
       <EnvironmentBackdrop />
     </>
   );

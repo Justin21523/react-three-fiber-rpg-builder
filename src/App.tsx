@@ -78,7 +78,8 @@ export const App = () => {
       {editMode && <EditModeInspector />}
       {editMode && <TerrainBrushHud />}
       {editMode && editorHubOpen && <EditorHubPanel />}
-      <Canvas shadows dpr={[1, 1.75]} camera={{ position: [0, 5, 10], fov: 50, near: 0.1, far: 1500 }}>
+      {/* DPR capped lower (high-DPI screens were fill-bound); a PerformanceMonitor in Scene adapts it. */}
+      <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 5, 10], fov: 50, near: 0.1, far: 1500 }}>
         <Scene />
       </Canvas>
     </div>
