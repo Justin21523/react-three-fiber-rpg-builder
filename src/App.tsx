@@ -7,9 +7,12 @@ import { usePbrPatchEditStore } from './stores/pbrPatchEditStore';
 import { useEditorEnvironmentStore } from './stores/editorEnvironmentStore';
 import { usePlayerStore } from './stores/playerStore';
 import { Scene } from './game/core/Scene';
+import { InteractionHandler } from './game/interaction/InteractionHandler';
 import { Dock } from './ui/Dock';
 import { EditorHubPanel } from './ui/EditorHubPanel';
 import { TerrainBrushHud } from './ui/TerrainBrushHud';
+import { InteractionPrompt } from './ui/InteractionPrompt';
+import { WorldClockHUD } from './ui/WorldClockHUD';
 
 // Kit — top-level: the 3D <Canvas> with DOM overlays layered over it. F1 toggles Edit Mode; in Edit
 // Mode the camera free-pans, gizmos appear, and the Editor Hub + floating terrain palette are usable.
@@ -52,7 +55,11 @@ export const App = () => {
 
   return (
     <div className="fixed inset-0 bg-gray-900">
+      <InteractionHandler />
       <Dock />
+      <WorldClockHUD />
+      {/* Overworld-only HUD (hidden while editing). */}
+      {!editMode && <InteractionPrompt />}
       {editMode && <TerrainBrushHud />}
       {editMode && editorHubOpen && <EditorHubPanel />}
       <Canvas shadows dpr={[1, 1.75]} camera={{ position: [0, 5, 10], fov: 50, near: 0.1, far: 1500 }}>
