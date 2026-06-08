@@ -7,6 +7,7 @@ import { usePbrPatchEditStore } from './stores/pbrPatchEditStore';
 import { useEditorEnvironmentStore } from './stores/editorEnvironmentStore';
 import { usePlayerStore } from './stores/playerStore';
 import { Scene } from './game/core/Scene';
+import { syncEditorQuests } from './stores/editorQuestStore';
 import { InteractionHandler } from './game/interaction/InteractionHandler';
 import { Dock } from './ui/Dock';
 import { EditorHubPanel } from './ui/EditorHubPanel';
@@ -21,6 +22,11 @@ import { QuestTracker } from './ui/QuestTracker';
 export const App = () => {
   const editMode = useUiStore((s) => s.editMode);
   const editorHubOpen = useUiStore((s) => s.editorHubOpen);
+
+  // Register any editor-authored quests (from localStorage) into the runtime quest store on startup.
+  useEffect(() => {
+    syncEditorQuests();
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

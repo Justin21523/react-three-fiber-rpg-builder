@@ -1,4 +1,5 @@
 import type { Item } from '../types/item';
+import { getEditorItem } from '../stores/editorQuestStore';
 
 // Kit — sample item catalogue. Add your own; reference them by id from quests / dialogue / placements.
 export const SEED_ITEMS: Item[] = [
@@ -7,5 +8,6 @@ export const SEED_ITEMS: Item[] = [
 ];
 
 export function getItem(id: string): Item | undefined {
-  return SEED_ITEMS.find((i) => i.id === id);
+  // Editor-authored items (📜 Quest / Item tab) win over seed items.
+  return getEditorItem(id) ?? SEED_ITEMS.find((i) => i.id === id);
 }
