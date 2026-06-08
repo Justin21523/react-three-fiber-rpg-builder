@@ -5,7 +5,9 @@ import { useEditorQuestStore } from '../../stores/editorQuestStore';
 import { SEED_DOORS } from '../../data/doors';
 import { SEED_AREAS } from '../../data/areas';
 import { SEED_COMBATANTS } from '../../data/combatants';
+import { SEED_ACTIVITIES } from '../../data/activities';
 import { useEditorEncounterStore } from '../../stores/editorEncounterStore';
+import { useEditorActivityStore } from '../../stores/editorActivityStore';
 import { editorSpawn } from '../../stores/sceneEditStore';
 import { Field, inp, lbl, useNpcOptions, useItemOptions, useAreaOptions } from './editorShared';
 import { IdSelect, type IdOption } from './idPickers';
@@ -13,10 +15,10 @@ import { ModelPicker } from './ModelPicker';
 import { AnimationPicker } from './AnimationPicker';
 
 // Which id source seeds the target picker for each objective type.
-const TARGET_KIND: Record<EditorObjectiveType, 'npc' | 'item' | 'area' | 'door' | 'trigger' | 'combatant' | 'none'> = {
+const TARGET_KIND: Record<EditorObjectiveType, 'npc' | 'item' | 'area' | 'door' | 'trigger' | 'combatant' | 'activity' | 'none'> = {
   talkToNPC: 'npc', collectItem: 'item', visitArea: 'area', reachLocation: 'area',
   inspectObject: 'trigger', triggerEvent: 'trigger', useTravelGate: 'trigger',
-  unlockDoor: 'door', defeatEnemy: 'combatant', custom: 'none',
+  unlockDoor: 'door', defeatEnemy: 'combatant', completeActivity: 'activity', custom: 'none',
 };
 
 // Kit — edit one quest objective: type, target (dropdown by type), count, optional, marker. (Trigger
@@ -30,6 +32,7 @@ export const QuestObjectiveEditor = ({ questId, obj, index, count }: { questId: 
   const areaOptions = useAreaOptions();
   const combatants = useEditorEncounterStore((s) => s.combatants);
   const encounters = useEditorEncounterStore((s) => s.encounters);
+  const activities = useEditorActivityStore((s) => s.activities);
 
   const set = (patch: Partial<EditorObjective>) => update(questId, obj.id, patch);
   const kind = TARGET_KIND[obj.type];
@@ -44,9 +47,10 @@ export const QuestObjectiveEditor = ({ questId, obj, index, count }: { questId: 
         ...combatants.map((c) => ({ id: c.id, label: c.name })),
         ...SEED_COMBATANTS.map((c) => ({ id: c.id, label: `${c.name} (seed)` })),
       ];
+      case 'activity': return [...activities.map((a) => ({ id: a.id, label: a.name })), ...SEED_ACTIVITIES.map((a) => ({ id: a.id, label: `${a.name} (seed)` }))];
       default: return null; // trigger / none → free text for now
     }
-  }, [kind, npcOptions, itemOptions, areaOptions, combatants, encounters]);
+  }, [kind, npcOptions, itemOptions, areaOptions, combatants, encounters, activities]);
 
   return (
     <div className="space-y-1 rounded border border-slate-700/60 bg-slate-900/50 p-2">

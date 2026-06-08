@@ -16,11 +16,12 @@ export type EditorObjectiveType =
   | 'reachLocation'
   | 'useTravelGate'
   | 'defeatEnemy'
+  | 'completeActivity'
   | 'custom';
 
 export const EDITOR_OBJECTIVE_TYPES: EditorObjectiveType[] = [
   'talkToNPC', 'collectItem', 'visitArea', 'inspectObject', 'unlockDoor',
-  'triggerEvent', 'reachLocation', 'useTravelGate', 'defeatEnemy', 'custom',
+  'triggerEvent', 'reachLocation', 'useTravelGate', 'defeatEnemy', 'completeActivity', 'custom',
 ];
 
 export interface EditorObjective {

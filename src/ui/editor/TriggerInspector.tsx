@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import type { EditorTrigger, EditorTriggerType } from '../../types/editorTrigger';
-import { EDITOR_TRIGGER_TYPES, TRIGGER_TYPE_LABEL, TRIGGER_COLOR, itemPickupConfig, dialogueConfig, restPointConfig, battleConfig } from '../../types/editorTrigger';
+import { EDITOR_TRIGGER_TYPES, TRIGGER_TYPE_LABEL, TRIGGER_COLOR, itemPickupConfig, dialogueConfig, restPointConfig, battleConfig, activityConfig } from '../../types/editorTrigger';
 import { useEditorTriggerStore } from '../../stores/editorTriggerStore';
 import { useEditorEncounterStore } from '../../stores/editorEncounterStore';
+import { useEditorActivityStore } from '../../stores/editorActivityStore';
 import { useUiStore } from '../../stores/uiStore';
 import { evaluateTrigger } from '../../game/editor/evaluateTrigger';
 import { fireEditorTrigger } from '../../game/editor/fireEditorTrigger';
@@ -25,6 +26,7 @@ export const TriggerInspector = ({ trigger }: { trigger: EditorTrigger }) => {
   const itemOptions = useItemOptions();
   const dialogueOptions = useDialogueOptions();
   const encounters = useEditorEncounterStore((s) => s.encounters);
+  const activities = useEditorActivityStore((s) => s.activities);
   const [msg, setMsg] = useState<string | null>(null);
 
   const t = trigger;
@@ -96,6 +98,11 @@ export const TriggerInspector = ({ trigger }: { trigger: EditorTrigger }) => {
         <div className="grid grid-cols-2 gap-2 rounded border border-red-700/30 bg-red-950/20 p-2">
           <Field label="encounterId (the battle)"><IdSelect value={battleConfig(t).encounterId} onChange={(v) => set({ battle: { ...battleConfig(t), encounterId: v } })} options={encounters.map((e) => ({ id: e.id, label: e.displayName }))} placeholder="(choose encounter)" /></Field>
           <p className="col-span-2 text-[10px] leading-snug text-slate-500">Or link the trigger from the ⚔ Encounters tab. Battle triggers fire on contact (walk into them).</p>
+        </div>
+      )}
+      {t.triggerType === 'activityTrigger' && (
+        <div className="grid grid-cols-2 gap-2 rounded border border-emerald-700/30 bg-emerald-950/20 p-2">
+          <Field label="activityId (mini-game)"><IdSelect value={activityConfig(t).activityId} onChange={(v) => set({ activity: { ...activityConfig(t), activityId: v } })} options={activities.map((a) => ({ id: a.id, label: a.name }))} placeholder="(choose mini-game)" /></Field>
         </div>
       )}
 

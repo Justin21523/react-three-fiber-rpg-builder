@@ -12,13 +12,14 @@ export type EditorTriggerType =
   | 'dialogueTrigger'
   | 'restPoint'
   | 'battleTrigger'
-  | 'bossGate';
+  | 'bossGate'
+  | 'activityTrigger';
 
 export type EditorTriggerDisplayMode = 'box' | 'marker' | 'debug';
 
 export const EDITOR_TRIGGER_TYPES: EditorTriggerType[] = [
   'travelGate', 'zoneGate', 'explorationPoint', 'interactionPoint', 'itemPickup', 'dialogueTrigger', 'restPoint',
-  'battleTrigger', 'bossGate',
+  'battleTrigger', 'bossGate', 'activityTrigger',
 ];
 
 export type GateStyle = 'door' | 'portal' | 'stairs' | 'arch' | 'plain';
@@ -49,6 +50,7 @@ export interface ExplorationPointConfig {
 }
 
 export interface BattleTriggerConfig { encounterId?: string; recommendedLevel?: number }
+export interface ActivityTriggerConfig { activityId?: string }
 export interface ItemPickupConfig { itemId?: string; quantity?: number; pickupMessage?: string }
 export interface DialogueTriggerConfig { dialogueId?: string; startNodeId?: string; onceOnly?: boolean }
 export interface RestPointConfig { message?: string; saveAfterRest?: boolean } // kit: no party HP to heal
@@ -94,6 +96,7 @@ export interface EditorTrigger {
   dialogue?: DialogueTriggerConfig;
   restPoint?: RestPointConfig;
   battle?: BattleTriggerConfig;
+  activity?: ActivityTriggerConfig;
   onInteractEffects?: DialogueEffect[];
 }
 
@@ -102,13 +105,13 @@ export const CONTACT_TRIGGER_TYPES: ReadonlySet<EditorTriggerType> = new Set<Edi
 
 export const TRIGGER_COLOR: Record<EditorTriggerType, string> = {
   travelGate: '#3b82f6', zoneGate: '#22d3ee', explorationPoint: '#fbbf24', interactionPoint: '#38bdf8',
-  itemPickup: '#f472b6', dialogueTrigger: '#60a5fa', restPoint: '#86efac', battleTrigger: '#ef4444', bossGate: '#b91c1c',
+  itemPickup: '#f472b6', dialogueTrigger: '#60a5fa', restPoint: '#86efac', battleTrigger: '#ef4444', bossGate: '#b91c1c', activityTrigger: '#34d399',
 };
 
 export const TRIGGER_TYPE_LABEL: Record<EditorTriggerType, string> = {
   travelGate: 'Travel Gate', zoneGate: 'Zone Gate', explorationPoint: 'Exploration Point',
   interactionPoint: 'Interaction Point', itemPickup: 'Item Pickup', dialogueTrigger: 'Dialogue Trigger', restPoint: 'Rest Point',
-  battleTrigger: 'Battle Trigger', bossGate: 'Boss Gate',
+  battleTrigger: 'Battle Trigger', bossGate: 'Boss Gate', activityTrigger: 'Activity Trigger',
 };
 
 let codeSeq = 0;
@@ -134,6 +137,7 @@ export function createDefaultTrigger(id: string, zoneId: string, triggerType: Ed
     case 'restPoint': base.restPoint = { message: 'You rest for a moment.' }; break;
     case 'battleTrigger':
     case 'bossGate': base.battle = { recommendedLevel: 1 }; break;
+    case 'activityTrigger': base.activity = {}; break;
   }
   return base;
 }
@@ -145,3 +149,4 @@ export const itemPickupConfig = (t: EditorTrigger): ItemPickupConfig => ({ quant
 export const dialogueConfig = (t: EditorTrigger): DialogueTriggerConfig => ({ ...t.dialogue });
 export const restPointConfig = (t: EditorTrigger): RestPointConfig => ({ ...t.restPoint });
 export const battleConfig = (t: EditorTrigger): BattleTriggerConfig => ({ ...t.battle });
+export const activityConfig = (t: EditorTrigger): ActivityTriggerConfig => ({ ...t.activity });

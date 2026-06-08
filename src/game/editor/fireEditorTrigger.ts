@@ -1,8 +1,9 @@
 import type { EditorTrigger } from '../../types/editorTrigger';
-import { gateConfig, explorationConfig, itemPickupConfig, dialogueConfig, restPointConfig, battleConfig } from '../../types/editorTrigger';
+import { gateConfig, explorationConfig, itemPickupConfig, dialogueConfig, restPointConfig, battleConfig, activityConfig } from '../../types/editorTrigger';
 import { useEditorTriggerStore } from '../../stores/editorTriggerStore';
 import { getEditorEncounter, getEditorEncounterByTrigger } from '../../stores/editorEncounterStore';
 import { startEditorEncounter } from '../battle/startEncounter';
+import { useActivityStore } from '../../stores/activityStore';
 import { evaluateTrigger } from './evaluateTrigger';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useWorldStore } from '../../stores/worldStore';
@@ -91,6 +92,13 @@ export function fireEditorTrigger(t: EditorTrigger | undefined, opts?: { test?: 
       if (!enc) return { ok: false, message: 'No encounter linked (set encounterId)' };
       if (!startEditorEncounter(enc)) return { ok: false, message: 'Could not start battle' };
       message = 'battle';
+      break;
+    }
+    case 'activityTrigger': {
+      const a = activityConfig(t);
+      if (!a.activityId) return { ok: false, message: 'No activity linked (set activityId)' };
+      if (!useActivityStore.getState().startActivity(a.activityId)) return { ok: false, message: 'Could not start activity' };
+      message = 'activity';
       break;
     }
   }

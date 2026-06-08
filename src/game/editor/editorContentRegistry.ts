@@ -5,6 +5,7 @@ import { useEditorTriggerStore } from '../../stores/editorTriggerStore';
 import { useEditorNpcStore } from '../../stores/editorNpcStore';
 import { useEditorQuestStore } from '../../stores/editorQuestStore';
 import { useEditorEncounterStore } from '../../stores/editorEncounterStore';
+import { useEditorActivityStore } from '../../stores/editorActivityStore';
 
 // Kit — a single registry describing every editable content domain (each backed by its own store) with
 // serialize / deserialize / clear / summary hooks. The foundation for the unified project Export/Import.
@@ -82,6 +83,14 @@ export const EDITOR_CONTENT_DOMAINS: EditorContentDomain[] = [
     deserialize: (data) => { if (isObj(data)) useEditorEncounterStore.getState().importState(data as { encounters?: never; combatants?: never }); },
     clear: () => useEditorEncounterStore.getState().reset(),
     summary: () => { const s = useEditorEncounterStore.getState(); return `${s.encounters.length} encounters · ${s.combatants.length} combatants`; },
+  },
+  {
+    id: 'editorActivity',
+    label: 'Mini-games',
+    serialize: () => ({ activities: useEditorActivityStore.getState().activities }),
+    deserialize: (data) => { if (isObj(data)) useEditorActivityStore.getState().importState(data as { activities?: never }); },
+    clear: () => useEditorActivityStore.getState().reset(),
+    summary: () => `${useEditorActivityStore.getState().activities.length} mini-games`,
   },
 ];
 
