@@ -75,13 +75,12 @@ const EncounterInspector = ({ enc, combatants }: { enc: EditorEncounter; combata
         <Field label="encounterType"><select value={enc.encounterType} onChange={(e) => set({ encounterType: e.target.value as EncounterType })} className={inp}>{ENCOUNTER_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</select></Field>
         <Field label="recommendedLevel"><input type="number" min={1} value={enc.recommendedLevel} onChange={(e) => set({ recommendedLevel: parseInt(e.target.value, 10) || 1 })} className={inp} /></Field>
         <Field label="linked trigger"><IdSelect value={enc.triggerId} onChange={(v) => set({ triggerId: v })} options={triggerOptions} placeholder="(none)" /></Field>
-        <Field label="world position (x / y / z)">
+        <Field label="group anchor (x / y / z — enemies spread from here)">
           <div className="flex items-center gap-1">
             {([0, 1, 2] as const).map((ax) => {
               const p = enc.position ?? [0, 0, 4];
               return <input key={ax} type="number" step={0.5} value={p[ax]} onChange={(e) => { const np = [...p] as [number, number, number]; np[ax] = parseFloat(e.target.value) || 0; set({ position: np }); }} className={inp} title={['x', 'y', 'z'][ax]} />;
             })}
-            <button onClick={() => useWorldSelectStore.getState().select(`enc:${enc.id}`)} title="Select in the world to drag with the gizmo (Edit Mode)" className="shrink-0 rounded border border-sky-700/50 bg-sky-700/20 px-1.5 py-1 text-[10px] text-sky-100 hover:bg-sky-700/30">📍</button>
           </div>
         </Field>
         <Field label="winCondition">
@@ -108,12 +107,19 @@ const EncounterInspector = ({ enc, combatants }: { enc: EditorEncounter; combata
         <button className={btn} onClick={() => set({ enemyTeam: [...enc.enemyTeam, makeEnemySlot(enc.enemyTeam.length)] })}>+ Enemy</button>
       </div>
       {enc.enemyTeam.map((s, i) => (
-        <div key={i} className="flex items-center gap-1 rounded border border-slate-700/60 bg-slate-900/50 p-1.5">
-          <span className="font-mono text-[10px] text-slate-500">#{i + 1}</span>
-          <select value={s.combatantId} onChange={(e) => setSlot(i, { combatantId: e.target.value })} className={`flex-1 ${inp}`}>{combatantOptions.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>
-          <label className="flex items-center gap-1 text-[10px] text-slate-400">Lv<input type="number" min={1} value={s.level} onChange={(e) => setSlot(i, { level: parseInt(e.target.value, 10) || 1 })} className={`w-12 ${inp}`} /></label>
-          <label className="flex items-center gap-1 text-[10px] text-slate-400"><input type="checkbox" checked={!!s.isBoss} onChange={(e) => setSlot(i, { isBoss: e.target.checked })} />boss</label>
-          <button className={`${btn} text-red-300`} onClick={() => set({ enemyTeam: enc.enemyTeam.filter((_, j) => j !== i) })}>✕</button>
+        <div key={i} className="space-y-1 rounded border border-slate-700/60 bg-slate-900/50 p-1.5">
+          <div className="flex items-center gap-1">
+            <span className="font-mono text-[10px] text-slate-500">#{i + 1}</span>
+            <select value={s.combatantId} onChange={(e) => setSlot(i, { combatantId: e.target.value })} className={`flex-1 ${inp}`}>{combatantOptions.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>
+            <label className="flex items-center gap-1 text-[10px] text-slate-400">Lv<input type="number" min={1} value={s.level} onChange={(e) => setSlot(i, { level: parseInt(e.target.value, 10) || 1 })} className={`w-12 ${inp}`} /></label>
+            <label className="flex items-center gap-1 text-[10px] text-slate-400"><input type="checkbox" checked={!!s.isBoss} onChange={(e) => setSlot(i, { isBoss: e.target.checked })} />boss</label>
+            <button onClick={() => useWorldSelectStore.getState().select(`enc:${enc.id}:slot:${i}`)} title="Select in the world to drag with the gizmo (Edit Mode)" className="rounded border border-sky-700/50 bg-sky-700/20 px-1.5 py-1 text-[10px] text-sky-100 hover:bg-sky-700/30">📍</button>
+            <button className={`${btn} text-red-300`} onClick={() => set({ enemyTeam: enc.enemyTeam.filter((_, j) => j !== i) })}>✕</button>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-10 shrink-0 text-[9px] uppercase text-slate-500">model</span>
+            <div className="flex-1"><ModelPicker value={s.modelAssetId} onChange={(v) => setSlot(i, { modelAssetId: v })} noneLabel="(from combatant)" /></div>
+          </div>
         </div>
       ))}
 

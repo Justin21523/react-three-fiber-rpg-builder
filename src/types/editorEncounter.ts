@@ -10,6 +10,8 @@ export interface EditorEnemySlot {
   level: number;
   slotId: number;
   isBoss?: boolean;
+  modelAssetId?: string;             // per-slot model override (else the combatant's model)
+  position?: [number, number, number]; // world position (gizmo-movable in Edit Mode; cosmetic for battle)
 }
 
 export interface EditorEncounterRewards {
