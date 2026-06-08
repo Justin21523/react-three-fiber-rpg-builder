@@ -23,6 +23,7 @@ import { BattleOverlay } from './ui/BattleOverlay';
 import { useBattleStore } from './stores/battleStore';
 import { ActivityHud } from './ui/ActivityHud';
 import { useActivityStore } from './stores/activityStore';
+import { PlayToolbar } from './ui/play/PlayToolbar';
 
 // Kit — top-level: the 3D <Canvas> with DOM overlays layered over it. F1 toggles Edit Mode; in Edit
 // Mode the camera free-pans, gizmos appear, and the Editor Hub + floating terrain palette are usable.
@@ -79,6 +80,7 @@ export const App = () => {
       {/* Overworld-only HUD (hidden while editing). */}
       {!editMode && !inBattle && !inActivity && <InteractionPrompt />}
       {!editMode && !inBattle && !inActivity && <QuestTracker />}
+      {!editMode && !inBattle && !inActivity && <PlayToolbar />}
       <DialogueBox />
       <BattleOverlay />
       <ActivityHud />

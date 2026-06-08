@@ -8,7 +8,9 @@ export type PanelId =
   | 'sim'
   | 'graphics'
   | 'saveSlots'
-  | 'contentFiles';
+  | 'contentFiles'
+  | 'map'
+  | 'inventory';
 
 interface UiState {
   activePanel: PanelId | null;
