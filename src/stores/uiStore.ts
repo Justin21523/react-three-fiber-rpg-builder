@@ -10,7 +10,10 @@ export type PanelId =
   | 'saveSlots'
   | 'contentFiles'
   | 'map'
-  | 'inventory';
+  | 'inventory'
+  | 'quests'
+  | 'stats'
+  | 'mapExport';
 
 interface UiState {
   activePanel: PanelId | null;

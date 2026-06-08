@@ -22,9 +22,12 @@ export interface SaveSlot { name: string; savedAt: string; data: SaveData }
 interface SaveStoreState {
   slots: SaveSlot[];
   saveToSlot: (name: string) => void;
+  quickSave: () => void;
   loadSlot: (name: string) => boolean;
   deleteSlot: (name: string) => void;
 }
+
+export const QUICK_SAVE_SLOT = 'Quick Save';
 
 const STORAGE_KEY = 'r3f-rpg-builder-saves-v1';
 
@@ -78,6 +81,7 @@ export const useSaveStore = create<SaveStoreState>((set, get) => ({
     const slots = [...get().slots.filter((s) => s.name !== name), slot].sort((a, b) => a.name.localeCompare(b.name));
     set({ slots }); persist(slots);
   },
+  quickSave: () => get().saveToSlot(QUICK_SAVE_SLOT),
   loadSlot: (name) => {
     const slot = get().slots.find((s) => s.name === name);
     if (!slot) return false;
