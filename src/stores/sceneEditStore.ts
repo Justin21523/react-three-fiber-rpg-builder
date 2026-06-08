@@ -154,8 +154,8 @@ export const useSceneEditStore = create<SceneEditState>((set, get) => ({
   clearAllAreas: uiPrefs.clearAllAreas,
   fullClearedAreas: uiPrefs.fullClearedAreas,
 
-  setPaletteScale: (n) => set({ paletteScale: Math.max(0.5, Math.min(1, Math.round(n * 100) / 100)) }),
-  setInspectorScale: (n) => set({ inspectorScale: Math.max(0.5, Math.min(1, Math.round(n * 100) / 100)) }),
+  setPaletteScale: (n) => set({ paletteScale: Math.max(0.6, Math.min(2, Math.round(n * 100) / 100)) }),
+  setInspectorScale: (n) => set({ inspectorScale: Math.max(0.6, Math.min(2, Math.round(n * 100) / 100)) }),
   togglePanelHints: () => set((s) => ({ panelHints: !s.panelHints })),
   toggleHideBackdrop: () => set((s) => ({ hideBackdrop: !s.hideBackdrop })),
   toggleAreaCleared: (areaId) => set((s) => {

@@ -30,7 +30,7 @@ export const EditAssetPalette = () => {
   return (
     <div
       style={{ transform: `translateY(-50%) scale(${paletteScale})`, transformOrigin: 'left center' }}
-      className="pointer-events-auto absolute left-3 top-1/2 z-[70] flex max-h-[86vh] w-72 flex-col rounded-xl border border-violet-700/50 bg-slate-950/90 p-3 text-slate-100 shadow-2xl backdrop-blur-sm"
+      className="pointer-events-auto absolute left-3 top-1/2 z-[70] flex max-h-[86vh] w-80 flex-col rounded-xl border border-violet-700/50 bg-slate-950/90 p-3 text-slate-100 shadow-2xl backdrop-blur-sm"
     >
       <div className="mb-2 flex items-center justify-between gap-1">
         <span className="text-sm font-bold text-violet-100">➕ Add Model <span className="text-[11px] font-normal text-slate-400">{MODEL_ASSET_LIST.length}</span></span>

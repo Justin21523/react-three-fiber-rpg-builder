@@ -51,6 +51,7 @@ export const EditorHubPanel = () => {
   const close = useUiStore((s) => s.toggleEditorHub);
   const [tab, setTab] = useState<Tab>('environment');
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [scale, setScale] = useState(1); // hub zoom (60%–200%)
   const dragRef = useRef<{ ox: number; oy: number } | null>(null);
   useEffect(() => {
     const move = (e: PointerEvent) => { const d = dragRef.current; if (d) setPos({ x: e.clientX - d.ox, y: e.clientY - d.oy }); };
@@ -70,11 +71,23 @@ export const EditorHubPanel = () => {
   return (
     <div
       data-hub
-      style={pos ? { left: pos.x, top: pos.y } : undefined}
-      className={`pointer-events-auto absolute z-[80] flex h-[80vh] max-h-[96vh] min-h-[18rem] w-[48rem] min-w-[22rem] max-w-[98vw] resize overflow-hidden rounded-2xl border border-violet-700/50 bg-slate-950/75 text-slate-100 shadow-2xl backdrop-blur-md ${pos ? '' : 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'}`}
+      style={{
+        left: pos ? pos.x : '50%',
+        top: pos ? pos.y : '50%',
+        transform: pos ? `scale(${scale})` : `translate(-50%, -50%) scale(${scale})`,
+        transformOrigin: pos ? 'top left' : 'center',
+      }}
+      className="pointer-events-auto absolute z-[80] flex h-[80vh] max-h-[96vh] min-h-[18rem] w-[48rem] min-w-[22rem] max-w-[98vw] resize overflow-hidden rounded-2xl border border-violet-700/50 bg-slate-950/75 text-slate-100 shadow-2xl backdrop-blur-md"
     >
       <div className="flex w-44 shrink-0 flex-col border-r border-slate-800/60 bg-slate-900/40 p-2">
-        <div onPointerDown={onHeaderDown} className="mb-2 cursor-move select-none px-2 pt-1 text-sm font-bold text-violet-100" title="Drag to move">⚙ Editor Hub <span className="text-[9px] font-normal text-slate-500">⠿</span></div>
+        <div className="mb-2 flex items-center justify-between gap-1">
+          <span onPointerDown={onHeaderDown} className="cursor-move select-none px-1 pt-1 text-sm font-bold text-violet-100" title="Drag to move">⚙ Hub <span className="text-[9px] font-normal text-slate-500">⠿</span></span>
+          <div className="flex items-center gap-0.5 text-slate-400">
+            <button onClick={() => setScale((s) => Math.max(0.6, Math.round((s - 0.1) * 100) / 100))} title="Smaller" className="rounded px-1 text-sm hover:bg-slate-800">−</button>
+            <span className="w-8 text-center text-[10px] text-slate-500">{Math.round(scale * 100)}%</span>
+            <button onClick={() => setScale((s) => Math.min(2, Math.round((s + 0.1) * 100) / 100))} title="Bigger" className="rounded px-1 text-sm hover:bg-slate-800">+</button>
+          </div>
+        </div>
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} className={`mb-0.5 rounded-lg px-3 py-2 text-left text-xs font-semibold ${tab === t.id ? 'bg-violet-600/30 text-violet-100' : 'text-slate-300 hover:bg-slate-800'}`}>{t.label}</button>
         ))}
