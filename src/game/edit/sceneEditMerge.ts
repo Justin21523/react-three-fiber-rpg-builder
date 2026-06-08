@@ -4,7 +4,7 @@
 export type Vec3 = [number, number, number];
 
 // Every editable placement kind in the world.
-export type EditKind = 'setpiece' | 'groundtile' | 'decoration' | 'building' | 'npc' | 'item' | 'trigger' | 'scatter' | 'regional' | 'prop' | 'landmark' | 'yokai' | 'structure' | 'platform' | 'encounter' | 'questmarker';
+export type EditKind = 'setpiece' | 'groundtile' | 'decoration' | 'building' | 'npc' | 'item' | 'trigger' | 'scatter' | 'regional' | 'prop' | 'landmark' | 'yokai' | 'structure' | 'platform' | 'encounter' | 'questmarker' | 'activity';
 
 // Phase C — collider shape when an object is solid. 'cuboid' = loose bounding box (cheap),
 // 'hull' = convex hull (tight-ish), 'trimesh' = exact per-mesh (walk slopes / through gaps),

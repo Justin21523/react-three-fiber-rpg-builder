@@ -10,6 +10,9 @@ import { SceneSetPieceLayer } from './SceneSetPieceLayer';
 import { SampleEntities } from './SampleEntities';
 import { EditableNpcLayer } from './EditableNpcLayer';
 import { EditableTriggerRenderer } from '../editor/EditableTriggerRenderer';
+import { QuestMarkerRenderer } from '../editor/QuestMarkerRenderer';
+import { EncounterMarkerRenderer } from '../editor/EncounterMarkerRenderer';
+import { ActivityArenaRenderer } from '../editor/ActivityArenaRenderer';
 import { ZoneGate } from './ZoneGate';
 
 // Kit — renders one area's world: the ground stack (flat / flat-PBR / heightfield terrain via the
@@ -31,6 +34,9 @@ export const AreaRenderer = ({ areaId }: { areaId: string }) => {
       <SampleEntities areaId={areaId} />
       <EditableNpcLayer areaId={areaId} />
       <EditableTriggerRenderer areaId={areaId} />
+      <QuestMarkerRenderer areaId={areaId} />
+      <EncounterMarkerRenderer areaId={areaId} />
+      <ActivityArenaRenderer areaId={areaId} />
 
       {(area?.connectedAreaIds ?? []).map((targetId) => {
         const g = edgeGate(targetId);

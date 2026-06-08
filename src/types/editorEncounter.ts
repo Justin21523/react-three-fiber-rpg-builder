@@ -36,6 +36,7 @@ export interface EditorEncounter {
   displayName: string;
   encounterType: EncounterType;
   zoneId: string;
+  position?: [number, number, number]; // world marker position (gizmo-movable in Edit Mode)
   recommendedLevel: number;
   triggerId?: string;           // links to a battleTrigger / bossGate
   enemyTeam: EditorEnemySlot[];
@@ -52,6 +53,7 @@ export function createDefaultEncounter(id: string, zoneId: string): EditorEncoun
     displayName: 'New Encounter',
     encounterType: 'normal',
     zoneId,
+    position: [0, 0, 4],
     recommendedLevel: 1,
     enemyTeam: [{ combatantId: 'cb_slime', level: 1, slotId: 0 }],
     rewards: { bonusExp: 20 },

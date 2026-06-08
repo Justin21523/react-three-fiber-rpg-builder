@@ -5,6 +5,8 @@ import { SEED_COMBATANTS } from '../../data/combatants';
 import { useEditorEncounterStore } from '../../stores/editorEncounterStore';
 import { useEditorTriggerStore } from '../../stores/editorTriggerStore';
 import { usePlayerStore } from '../../stores/playerStore';
+import { useSceneEditStore } from '../../stores/sceneEditStore';
+import { objKey } from '../../game/edit/sceneEditMerge';
 import { startEditorEncounter } from '../../game/battle/startEncounter';
 import { Field, inp, csv, parseCsv, useItemOptions, useQuestOptions } from './editorShared';
 import { IdSelect, IdMultiPicker, type IdOption } from './idPickers';
@@ -74,6 +76,15 @@ const EncounterInspector = ({ enc, combatants }: { enc: EditorEncounter; combata
         <Field label="encounterType"><select value={enc.encounterType} onChange={(e) => set({ encounterType: e.target.value as EncounterType })} className={inp}>{ENCOUNTER_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</select></Field>
         <Field label="recommendedLevel"><input type="number" min={1} value={enc.recommendedLevel} onChange={(e) => set({ recommendedLevel: parseInt(e.target.value, 10) || 1 })} className={inp} /></Field>
         <Field label="linked trigger"><IdSelect value={enc.triggerId} onChange={(v) => set({ triggerId: v })} options={triggerOptions} placeholder="(none)" /></Field>
+        <Field label="world position (x / y / z)">
+          <div className="flex items-center gap-1">
+            {([0, 1, 2] as const).map((ax) => {
+              const p = enc.position ?? [0, 0, 4];
+              return <input key={ax} type="number" step={0.5} value={p[ax]} onChange={(e) => { const np = [...p] as [number, number, number]; np[ax] = parseFloat(e.target.value) || 0; set({ position: np }); }} className={inp} title={['x', 'y', 'z'][ax]} />;
+            })}
+            <button onClick={() => useSceneEditStore.setState({ pendingSelectKey: objKey(enc.zoneId, 'encounter', enc.id) })} title="Select in the world to drag with the gizmo (Edit Mode)" className="shrink-0 rounded border border-sky-700/50 bg-sky-700/20 px-1.5 py-1 text-[10px] text-sky-100 hover:bg-sky-700/30">📍</button>
+          </div>
+        </Field>
         <Field label="winCondition">
           <select value={enc.winCondition?.type ?? 'defeatAll'} onChange={(e) => set({ winCondition: e.target.value === 'surviveTurns' ? { type: 'surviveTurns', turns: 5 } : { type: 'defeatAll' } })} className={inp}>
             <option value="defeatAll">defeatAll</option><option value="surviveTurns">surviveTurns</option>
