@@ -5,6 +5,7 @@ import { resolveAreaEnvironment, type ResolvedEnvironment } from '../../game/env
 import { DEFAULT_STABLE_OVERRIDE, type BackgroundMode, type GroundType, type LockTime, type PbrPatch } from '../../types/environmentOverride';
 import { SEED_AREAS } from '../../data/areas';
 import { TEXTURE_SETS } from '../../game/world/textureLibrary';
+import { useTextureThumb } from '../../game/world/useTextureThumb';
 import { MATERIAL_SETS } from '../../game/world/gltfMaterial';
 import { usePbrPatchEditStore } from '../../stores/pbrPatchEditStore';
 import { editorSpawn } from '../../stores/sceneEditStore';
@@ -55,32 +56,47 @@ const TextRow = ({ label, value, placeholder, onChange }: { label: string; value
 
 // Reusable, searchable thumbnail grid of texture sets. `onPick` receives the chosen set; `activeKey`
 // highlights the current one. A search box lets you switch between the ~100 textures at any time.
+// One thumbnail tile — downscales the (possibly 4K) albedo to a small cached data-URL so the grid is
+// cheap even with 100+ textures.
+const ThumbTile = ({ s, active, onPick }: { s: typeof TEXTURE_SETS[number]; active: boolean; onPick: () => void }) => {
+  const thumb = useTextureThumb(s.thumbUrl, 128);
+  return (
+    <button onClick={onPick} title={s.label} className={`group relative h-16 overflow-hidden rounded border ${active ? 'border-cyan-400 ring-1 ring-cyan-400' : 'border-slate-700 hover:border-slate-400'}`}>
+      {thumb ? <img src={thumb} alt={s.label} className="h-16 w-full object-cover" /> : <div className="h-16 w-full animate-pulse bg-slate-800" />}
+      <span className="absolute inset-x-0 bottom-0 truncate bg-black/70 px-1 text-[9px] text-slate-100">{s.label}</span>
+    </button>
+  );
+};
+
 const TextureSetGrid = ({ activeKey, onPick }: { activeKey?: string; onPick: (s: typeof TEXTURE_SETS[number]) => void }) => {
   const [q, setQ] = useState('');
+  // Thumbnails are hidden by default — they decode images, so only build them when explicitly opened.
+  const [showThumbs, setShowThumbs] = useState(false);
   if (TEXTURE_SETS.length === 0) {
     return <p className="rounded bg-slate-900/60 px-2 py-1.5 text-[10px] leading-relaxed text-slate-500">Drop PBR maps into <code className="text-slate-400">src/assets/textures/</code> (e.g. <code className="text-slate-400">grass_diff_4k.jpg</code>, <code className="text-slate-400">grass_nor_gl_4k.jpg</code>) — they appear here automatically.</p>;
   }
   const filtered = q.trim() ? TEXTURE_SETS.filter((s) => s.label.toLowerCase().includes(q.trim().toLowerCase())) : TEXTURE_SETS;
   return (
     <div className="space-y-1">
-      {/* Explicit dropdown — switch texture set at any time. */}
-      <select value={activeKey ?? ''} onChange={(e) => { const s = TEXTURE_SETS.find((x) => (x.albedoKey ?? x.id) === e.target.value); if (s) onPick(s); }} className={`w-full ${inp}`}>
-        <option value="">— choose texture ({TEXTURE_SETS.length}) —</option>
-        {TEXTURE_SETS.map((s) => <option key={s.id} value={s.albedoKey ?? s.id}>{s.label}</option>)}
-      </select>
-      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`🔍 search ${TEXTURE_SETS.length} textures…`} className={`w-full ${inp}`} />
-      <div className="grid max-h-52 grid-cols-3 gap-1 overflow-auto rounded bg-slate-950/50 p-1">
-        {filtered.map((s) => {
-          const active = !!activeKey && (activeKey === s.albedoKey || activeKey === s.heightKey);
-          return (
-            <button key={s.id} onClick={() => onPick(s)} title={s.label} className={`group relative overflow-hidden rounded border ${active ? 'border-cyan-400 ring-1 ring-cyan-400' : 'border-slate-700 hover:border-slate-400'}`}>
-              <img src={s.thumbUrl} loading="lazy" alt={s.label} className="h-16 w-full object-cover" />
-              <span className="absolute inset-x-0 bottom-0 truncate bg-black/70 px-1 text-[9px] text-slate-100">{s.label}</span>
-            </button>
-          );
-        })}
-        {filtered.length === 0 && <p className="col-span-3 px-2 py-1 text-[10px] text-slate-500">No texture matches “{q}”.</p>}
+      {/* Explicit dropdown — switch texture set at any time (no image decode). */}
+      <div className="flex items-center gap-1">
+        <select value={activeKey ?? ''} onChange={(e) => { const s = TEXTURE_SETS.find((x) => (x.albedoKey ?? x.id) === e.target.value); if (s) onPick(s); }} className={`flex-1 ${inp}`}>
+          <option value="">— choose texture ({TEXTURE_SETS.length}) —</option>
+          {TEXTURE_SETS.map((s) => <option key={s.id} value={s.albedoKey ?? s.id}>{s.label}</option>)}
+        </select>
+        <button onClick={() => setShowThumbs((v) => !v)} title="Toggle thumbnail previews" className={`rounded border px-2 py-1 text-[11px] ${showThumbs ? 'border-cyan-500/60 bg-cyan-900/40 text-cyan-100' : 'border-slate-600 bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>🖼 {showThumbs ? '▾' : '▸'}</button>
       </div>
+      {showThumbs && (
+        <>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`🔍 search ${TEXTURE_SETS.length} textures…`} className={`w-full ${inp}`} />
+          <div className="grid max-h-52 grid-cols-3 gap-1 overflow-auto rounded bg-slate-950/50 p-1">
+            {filtered.map((s) => (
+              <ThumbTile key={s.id} s={s} active={!!activeKey && (activeKey === s.albedoKey || activeKey === s.heightKey)} onPick={() => onPick(s)} />
+            ))}
+            {filtered.length === 0 && <p className="col-span-3 px-2 py-1 text-[10px] text-slate-500">No texture matches “{q}”.</p>}
+          </div>
+        </>
+      )}
     </div>
   );
 };
