@@ -32,7 +32,12 @@ export const useUiStore = create<UiState>((set) => ({
   togglePanel: (id) => set((s) => ({ activePanel: s.activePanel === id ? null : id })),
   openPanel: (id) => set({ activePanel: id }),
   closePanel: () => set({ activePanel: null }),
-  toggleEditMode: () => set((s) => ({ editMode: !s.editMode })),
+  // Entering Edit Mode auto-opens the Editor Hub so there's an immediate, visible response to F1.
+  toggleEditMode: () =>
+    set((s) => {
+      const editMode = !s.editMode;
+      return { editMode, editorHubOpen: editMode ? true : s.editorHubOpen };
+    }),
   setEditMode: (on) => set({ editMode: on }),
   toggleEditorHub: () => set((s) => ({ editorHubOpen: !s.editorHubOpen })),
   toggleHints: () => set((s) => ({ hintsVisible: !s.hintsVisible })),
