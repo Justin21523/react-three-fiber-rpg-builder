@@ -12,8 +12,7 @@ import { SEED_COMBATANTS } from '../../data/combatants';
 import { useActivityStore } from '../../stores/activityStore';
 import { useEditorTriggerStore } from '../../stores/editorTriggerStore';
 import { usePlayerStore } from '../../stores/playerStore';
-import { useSceneEditStore } from '../../stores/sceneEditStore';
-import { objKey } from '../../game/edit/sceneEditMerge';
+import { useWorldSelectStore } from '../../stores/worldSelectStore';
 import { useUiStore } from '../../stores/uiStore';
 import { Field, inp, lbl, csv, parseCsv, useItemOptions, useAreaOptions } from './editorShared';
 import { IdSelect, IdMultiPicker } from './idPickers';
@@ -235,7 +234,7 @@ const ArenaTab = ({ ea }: { ea: EditorActivity }) => {
                 const placed = selectedPoint?.field === field && selectedPoint.index === i;
                 return (
                   <div key={i} className="flex items-center gap-1">
-                    <button onClick={() => { store.getState().selectPoint({ field, index: i }); useSceneEditStore.setState({ pendingSelectKey: objKey(ea.def.zoneId, 'activity', `${ea.def.id}:${field}:${i}`) }); }} className={`rounded px-1.5 py-0.5 text-[10px] ${placed ? 'bg-sky-600/40 text-sky-100' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`} title="Select to drag with the world gizmo">📍</button>
+                    <button onClick={() => { store.getState().selectPoint({ field, index: i }); useWorldSelectStore.getState().select(`act:${ea.def.id}:${field}:${i}`); }} className={`rounded px-1.5 py-0.5 text-[10px] ${placed ? 'bg-sky-600/40 text-sky-100' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`} title="Select to drag with the world gizmo">📍</button>
                     <Vec3Row v={p} onChange={(nv) => store.getState().updatePoint(field, i, nv)} />
                     <button onClick={() => store.getState().removePoint(field, i)} className="rounded px-1 text-[11px] text-red-300 hover:bg-red-700/30">✕</button>
                   </div>
@@ -324,7 +323,7 @@ const ParticipantsTab = ({ ea }: { ea: EditorActivity }) => {
               <select value={p.role} onChange={(e) => { const role = e.target.value as ActivityParticipantSlot['role']; upd(i, { role, color: ACTIVITY_SLOT_COLOR[role] }); }} className={num}>
                 {ACTIVITY_SLOT_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
-              <button onClick={() => { store.getState().selectPoint({ field: 'participant', index: i }); useSceneEditStore.setState({ pendingSelectKey: objKey(ea.def.zoneId, 'activity', `${ea.def.id}:p:${i}`) }); }} className={`rounded px-1.5 py-0.5 text-[10px] ${placed ? 'bg-sky-600/40 text-sky-100' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`} title="Select to drag with the world gizmo">📍 place</button>
+              <button onClick={() => { store.getState().selectPoint({ field: 'participant', index: i }); useWorldSelectStore.getState().select(`act:${ea.def.id}:p:${i}`); }} className={`rounded px-1.5 py-0.5 text-[10px] ${placed ? 'bg-sky-600/40 text-sky-100' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`} title="Select to drag with the world gizmo">📍 place</button>
               <button onClick={() => store.getState().removeParticipant(i)} className="ml-auto rounded px-1 text-[11px] text-red-300 hover:bg-red-700/30">✕</button>
             </div>
             <div className="grid grid-cols-2 gap-1">

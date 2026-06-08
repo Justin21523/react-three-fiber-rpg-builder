@@ -5,8 +5,7 @@ import { SEED_COMBATANTS } from '../../data/combatants';
 import { useEditorEncounterStore } from '../../stores/editorEncounterStore';
 import { useEditorTriggerStore } from '../../stores/editorTriggerStore';
 import { usePlayerStore } from '../../stores/playerStore';
-import { useSceneEditStore } from '../../stores/sceneEditStore';
-import { objKey } from '../../game/edit/sceneEditMerge';
+import { useWorldSelectStore } from '../../stores/worldSelectStore';
 import { startEditorEncounter } from '../../game/battle/startEncounter';
 import { Field, inp, csv, parseCsv, useItemOptions, useQuestOptions } from './editorShared';
 import { IdSelect, IdMultiPicker, type IdOption } from './idPickers';
@@ -82,7 +81,7 @@ const EncounterInspector = ({ enc, combatants }: { enc: EditorEncounter; combata
               const p = enc.position ?? [0, 0, 4];
               return <input key={ax} type="number" step={0.5} value={p[ax]} onChange={(e) => { const np = [...p] as [number, number, number]; np[ax] = parseFloat(e.target.value) || 0; set({ position: np }); }} className={inp} title={['x', 'y', 'z'][ax]} />;
             })}
-            <button onClick={() => useSceneEditStore.setState({ pendingSelectKey: objKey(enc.zoneId, 'encounter', enc.id) })} title="Select in the world to drag with the gizmo (Edit Mode)" className="shrink-0 rounded border border-sky-700/50 bg-sky-700/20 px-1.5 py-1 text-[10px] text-sky-100 hover:bg-sky-700/30">📍</button>
+            <button onClick={() => useWorldSelectStore.getState().select(`enc:${enc.id}`)} title="Select in the world to drag with the gizmo (Edit Mode)" className="shrink-0 rounded border border-sky-700/50 bg-sky-700/20 px-1.5 py-1 text-[10px] text-sky-100 hover:bg-sky-700/30">📍</button>
           </div>
         </Field>
         <Field label="winCondition">

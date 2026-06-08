@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuestStore } from '../../stores/questStore';
 import { useUiStore } from '../../stores/uiStore';
 import { PanelCard } from './playShared';
@@ -5,7 +6,10 @@ import { PanelCard } from './playShared';
 // Kit — play-mode 💡 Hints: controls reference + the current quest objectives, so the player always knows
 // what to do next. Toggled via uiStore.hintsVisible (its own flag, independent of the modal panels).
 export const HintsPanel = () => {
-  const active = useQuestStore((s) => s.getActiveQuests());
+  // Select the stable quests record, derive active with useMemo — selecting getActiveQuests() directly
+  // returns a NEW array each render (uncached snapshot) → infinite render loop.
+  const quests = useQuestStore((s) => s.quests);
+  const active = useMemo(() => Object.values(quests).filter((q) => q.status === 'InProgress'), [quests]);
   return (
     <PanelCard title="Hints" icon="💡" onClose={() => useUiStore.getState().toggleHints()} width="24rem">
       <div className="space-y-2 text-xs">

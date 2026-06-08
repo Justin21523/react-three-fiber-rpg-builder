@@ -4,8 +4,9 @@ import { getKitArea } from '../../data/areas';
 // Kit — always-on 🧭 mini-map HUD (top-right). Shows the current area + a compass dot for the player and
 // the directions of connected-area gates. A lightweight schematic (not a rendered top-down view).
 export const MiniMapHUD = () => {
+  // Subscribe only to the area (NOT position — that updates every frame and would re-render this HUD each
+  // frame). Shows the current area + its exits, a lightweight schematic.
   const areaId = usePlayerStore((s) => s.currentAreaId);
-  const pos = usePlayerStore((s) => s.position);
   const area = getKitArea(areaId);
   const exits = area?.connectedAreaIds ?? [];
   return (
@@ -21,7 +22,6 @@ export const MiniMapHUD = () => {
           </div>
         ))}
       </div>
-      {pos && <div className="mt-1 text-center font-mono text-[9px] text-slate-500">{pos.x.toFixed(0)}, {pos.z.toFixed(0)}</div>}
     </div>
   );
 };

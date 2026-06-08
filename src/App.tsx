@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { useUiStore } from './stores/uiStore';
 import { useTerrainHistoryStore } from './stores/terrainHistoryStore';
 import { useSceneEditStore } from './stores/sceneEditStore';
+import { useWorldSelectStore } from './stores/worldSelectStore';
 import { usePbrPatchEditStore } from './stores/pbrPatchEditStore';
 import { useEditorEnvironmentStore } from './stores/editorEnvironmentStore';
 import { usePlayerStore } from './stores/playerStore';
@@ -65,7 +66,7 @@ export const App = () => {
       else if (e.code === 'KeyE') useSceneEditStore.getState().setMode('rotate');
       else if (e.code === 'KeyR') useSceneEditStore.getState().setMode('scale');
       else if (e.code === 'Delete' || e.code === 'Backspace') useSceneEditStore.getState().deleteSelected();
-      else if (e.code === 'Escape') useSceneEditStore.getState().clearSelection();
+      else if (e.code === 'Escape') { useSceneEditStore.getState().clearSelection(); useWorldSelectStore.getState().select(null); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

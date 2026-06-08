@@ -5,16 +5,14 @@ import type { Group } from 'three';
 import { useEditorQuestStore } from '../../stores/editorQuestStore';
 import { useQuestStore } from '../../stores/questStore';
 import { useUiStore } from '../../stores/uiStore';
-import { useMergedTransform } from '../../stores/sceneEditStore';
-import { objKey } from '../edit/sceneEditMerge';
-import { EditableObject } from '../edit/EditableObject';
+import { DataBackedPlacement } from '../edit/DataBackedPlacement';
 import { AnimatedGlbModel } from '../world/AnimatedGlbModel';
 
 // Kit — renders editor quest objective markers (model or floating diamond) in the world. Edit Mode: each
-// is a gizmo-movable EditableObject (click / press 📍 then drag); play mode: shows only for InProgress
-// quests, at the merged (base ⊕ gizmo) transform. A marker appears for any objective with a markerPosition
-// OR a markerModelAssetId.
-type Marker = { suffix: string; pos: [number, number, number]; model?: string; animation?: string; color?: string; label: string };
+// is a DataBackedPlacement (click / 📍 then drag → writes back to the objective's markerPosition). Play
+// mode: shows only for InProgress quests, as a plain marker. Appears for any objective with a
+// markerPosition OR a markerModelAssetId.
+type Marker = { questId: string; objId: string; pos: [number, number, number]; model?: string; animation?: string; color?: string; label: string };
 
 export const QuestMarkerRenderer = ({ areaId }: { areaId: string }) => {
   const editMode = useUiStore((s) => s.editMode);
@@ -29,11 +27,11 @@ export const QuestMarkerRenderer = ({ areaId }: { areaId: string }) => {
       const objInArea = o.relatedAreaId ? o.relatedAreaId === areaId : inArea;
       if (!objInArea) continue;
       if (!editMode && runtime[q.id]?.status !== 'InProgress') continue;
-      markers.push({ suffix: `${q.id}:${o.id}`, pos: o.markerPosition ?? [0, 0, 0], model: o.markerModelAssetId, animation: o.markerAnimation, color: o.markerColor, label: o.description?.trim() || o.type });
+      markers.push({ questId: q.id, objId: o.id, pos: o.markerPosition ?? [0, 0, 0], model: o.markerModelAssetId, animation: o.markerAnimation, color: o.markerColor, label: o.description?.trim() || o.type });
     }
   }
   if (markers.length === 0) return null;
-  return <>{markers.map((m) => <QuestMarkerEntity key={m.suffix} areaId={areaId} marker={m} editMode={editMode} />)}</>;
+  return <>{markers.map((m) => <QuestMarkerEntity key={`${m.questId}:${m.objId}`} marker={m} editMode={editMode} />)}</>;
 };
 
 const Diamond = ({ color = '#fbbf24' }: { color?: string }) => {
@@ -46,16 +44,20 @@ const Diamond = ({ color = '#fbbf24' }: { color?: string }) => {
   );
 };
 
-const QuestMarkerEntity = ({ areaId, marker, editMode }: { areaId: string; marker: Marker; editMode: boolean }) => {
-  const key = objKey(areaId, 'questmarker', marker.suffix);
-  const base = { position: marker.pos };
-  const m = useMergedTransform(key, base);
+const QuestMarkerEntity = ({ marker, editMode }: { marker: Marker; editMode: boolean }) => {
   const visual = (
     <>
       {marker.model ? <AnimatedGlbModel assetId={marker.model} animation={marker.animation} fallback={<Diamond color={marker.color} />} /> : <Diamond color={marker.color} />}
       <Text position={[0, 2.1, 0]} fontSize={0.28} color="#fde68a" anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#000">{marker.label}</Text>
     </>
   );
-  if (editMode) return <EditableObject objKey={key} base={base}>{visual}</EditableObject>;
-  return <group position={m.position} rotation={m.rotation} scale={m.scale}>{visual}</group>;
+  if (editMode) {
+    return (
+      <DataBackedPlacement objKey={`qm:${marker.questId}:${marker.objId}`} position={marker.pos} color={marker.color ?? '#fbbf24'}
+        onMove={(pos) => useEditorQuestStore.getState().updateObjective(marker.questId, marker.objId, { markerPosition: pos })}>
+        {visual}
+      </DataBackedPlacement>
+    );
+  }
+  return <group position={marker.pos}>{visual}</group>;
 };
