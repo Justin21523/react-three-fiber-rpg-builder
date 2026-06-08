@@ -3,6 +3,8 @@ import { useInventoryStore } from '../stores/inventoryStore';
 import { useQuestStore } from '../stores/questStore';
 import { useFlagStore } from '../stores/flagStore';
 import { useDialogueStore } from '../stores/dialogueStore';
+import { getEditorEncounter } from '../stores/editorEncounterStore';
+import { startEditorEncounter } from './battle/startEncounter';
 
 // Kit — apply a generic dialogue/choice/quest effect to the live stores. Add a case here when you add
 // an effect kind to DialogueEffect.
@@ -24,6 +26,10 @@ export function executeEffect(effect: DialogueEffect): void {
       break;
     case 'setWorldFlag':
       useFlagStore.getState().setFlag(effect.flag);
+      break;
+    case 'startBattle':
+      useDialogueStore.getState().endDialogue();
+      startEditorEncounter(getEditorEncounter(effect.encounterId));
       break;
     case 'closeDialogue':
       useDialogueStore.getState().endDialogue();

@@ -19,7 +19,7 @@ export const DIALOGUE_EMOTIONS: DialogueEmotion[] = [
 
 export const DIALOGUE_EFFECT_TYPES: DialogueEffectType[] = [
   'startQuest', 'completeQuest', 'updateObjective', 'completeObjective',
-  'addItem', 'giveItem', 'setWorldFlag', 'closeDialogue',
+  'addItem', 'giveItem', 'setWorldFlag', 'startBattle', 'closeDialogue',
 ];
 
 export const DIALOGUE_CONDITION_TYPES: DialogueConditionType[] = [
@@ -35,6 +35,7 @@ export const EFFECT_FIELDS: Record<DialogueEffectType, MechField[]> = {
   addItem: [{ key: 'itemId', label: 'itemId', kind: 'string' }, { key: 'quantity', label: 'quantity', kind: 'number', optional: true }],
   giveItem: [{ key: 'itemId', label: 'itemId', kind: 'string' }, { key: 'quantity', label: 'quantity', kind: 'number', optional: true }],
   setWorldFlag: [{ key: 'flag', label: 'flag', kind: 'string' }],
+  startBattle: [{ key: 'encounterId', label: 'encounterId', kind: 'string' }],
   closeDialogue: [],
 };
 

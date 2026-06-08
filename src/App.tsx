@@ -19,12 +19,15 @@ import { InteractionPrompt } from './ui/InteractionPrompt';
 import { WorldClockHUD } from './ui/WorldClockHUD';
 import { DialogueBox } from './ui/DialogueBox';
 import { QuestTracker } from './ui/QuestTracker';
+import { BattleOverlay } from './ui/BattleOverlay';
+import { useBattleStore } from './stores/battleStore';
 
 // Kit — top-level: the 3D <Canvas> with DOM overlays layered over it. F1 toggles Edit Mode; in Edit
 // Mode the camera free-pans, gizmos appear, and the Editor Hub + floating terrain palette are usable.
 export const App = () => {
   const editMode = useUiStore((s) => s.editMode);
   const editorHubOpen = useUiStore((s) => s.editorHubOpen);
+  const inBattle = useBattleStore((s) => s.isActive);
 
   // Register any editor-authored quests (from localStorage) into the runtime quest store on startup.
   useEffect(() => {
@@ -71,9 +74,10 @@ export const App = () => {
       <Dock />
       <WorldClockHUD />
       {/* Overworld-only HUD (hidden while editing). */}
-      {!editMode && <InteractionPrompt />}
-      {!editMode && <QuestTracker />}
+      {!editMode && !inBattle && <InteractionPrompt />}
+      {!editMode && !inBattle && <QuestTracker />}
       <DialogueBox />
+      <BattleOverlay />
       {/* Edit Mode: independent panels — Assets (left-centre), Inspector (top-left), terrain palette, and
           the centred draggable Hub — matching the original layout. */}
       {editMode && <EditAssetPalette />}

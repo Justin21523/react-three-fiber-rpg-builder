@@ -1,6 +1,8 @@
 import type { EditorTrigger } from '../../types/editorTrigger';
-import { gateConfig, explorationConfig, itemPickupConfig, dialogueConfig, restPointConfig } from '../../types/editorTrigger';
+import { gateConfig, explorationConfig, itemPickupConfig, dialogueConfig, restPointConfig, battleConfig } from '../../types/editorTrigger';
 import { useEditorTriggerStore } from '../../stores/editorTriggerStore';
+import { getEditorEncounter, getEditorEncounterByTrigger } from '../../stores/editorEncounterStore';
+import { startEditorEncounter } from '../battle/startEncounter';
 import { evaluateTrigger } from './evaluateTrigger';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useWorldStore } from '../../stores/worldStore';
@@ -80,6 +82,15 @@ export function fireEditorTrigger(t: EditorTrigger | undefined, opts?: { test?: 
     case 'restPoint': {
       const rp = restPointConfig(t);
       message = rp.message || 'rested';
+      break;
+    }
+    case 'battleTrigger':
+    case 'bossGate': {
+      const b = battleConfig(t);
+      const enc = getEditorEncounterByTrigger(t.id) ?? getEditorEncounter(b.encounterId);
+      if (!enc) return { ok: false, message: 'No encounter linked (set encounterId)' };
+      if (!startEditorEncounter(enc)) return { ok: false, message: 'Could not start battle' };
+      message = 'battle';
       break;
     }
   }

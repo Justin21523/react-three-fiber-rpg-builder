@@ -4,6 +4,8 @@ import { EDITOR_OBJECTIVE_TYPES } from '../../types/editorQuest';
 import { useEditorQuestStore } from '../../stores/editorQuestStore';
 import { SEED_DOORS } from '../../data/doors';
 import { SEED_AREAS } from '../../data/areas';
+import { SEED_COMBATANTS } from '../../data/combatants';
+import { useEditorEncounterStore } from '../../stores/editorEncounterStore';
 import { editorSpawn } from '../../stores/sceneEditStore';
 import { Field, inp, lbl, useNpcOptions, useItemOptions, useAreaOptions } from './editorShared';
 import { IdSelect, type IdOption } from './idPickers';
@@ -11,10 +13,10 @@ import { ModelPicker } from './ModelPicker';
 import { AnimationPicker } from './AnimationPicker';
 
 // Which id source seeds the target picker for each objective type.
-const TARGET_KIND: Record<EditorObjectiveType, 'npc' | 'item' | 'area' | 'door' | 'trigger' | 'none'> = {
+const TARGET_KIND: Record<EditorObjectiveType, 'npc' | 'item' | 'area' | 'door' | 'trigger' | 'combatant' | 'none'> = {
   talkToNPC: 'npc', collectItem: 'item', visitArea: 'area', reachLocation: 'area',
   inspectObject: 'trigger', triggerEvent: 'trigger', useTravelGate: 'trigger',
-  unlockDoor: 'door', custom: 'none',
+  unlockDoor: 'door', defeatEnemy: 'combatant', custom: 'none',
 };
 
 // Kit — edit one quest objective: type, target (dropdown by type), count, optional, marker. (Trigger
@@ -26,6 +28,8 @@ export const QuestObjectiveEditor = ({ questId, obj, index, count }: { questId: 
   const npcOptions = useNpcOptions();
   const itemOptions = useItemOptions();
   const areaOptions = useAreaOptions();
+  const combatants = useEditorEncounterStore((s) => s.combatants);
+  const encounters = useEditorEncounterStore((s) => s.encounters);
 
   const set = (patch: Partial<EditorObjective>) => update(questId, obj.id, patch);
   const kind = TARGET_KIND[obj.type];
@@ -35,9 +39,14 @@ export const QuestObjectiveEditor = ({ questId, obj, index, count }: { questId: 
       case 'item': return itemOptions;
       case 'area': return areaOptions;
       case 'door': return SEED_DOORS.map((d) => ({ id: d.id, label: d.label }));
+      case 'combatant': return [
+        ...encounters.map((e) => ({ id: e.id, label: `${e.displayName} (encounter)` })),
+        ...combatants.map((c) => ({ id: c.id, label: c.name })),
+        ...SEED_COMBATANTS.map((c) => ({ id: c.id, label: `${c.name} (seed)` })),
+      ];
       default: return null; // trigger / none → free text for now
     }
-  }, [kind, npcOptions, itemOptions, areaOptions]);
+  }, [kind, npcOptions, itemOptions, areaOptions, combatants, encounters]);
 
   return (
     <div className="space-y-1 rounded border border-slate-700/60 bg-slate-900/50 p-2">

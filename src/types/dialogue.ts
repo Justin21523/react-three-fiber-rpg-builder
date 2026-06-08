@@ -48,6 +48,7 @@ export type DialogueEffect =
   | { type: 'startQuest'; questId: string }
   | { type: 'completeQuest'; questId: string }
   | { type: 'setWorldFlag'; flag: string }
+  | { type: 'startBattle'; encounterId: string }
   | { type: 'closeDialogue' };
 
 export interface DialogueChoice {

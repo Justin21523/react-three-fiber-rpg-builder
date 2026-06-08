@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { EditorTrigger, EditorTriggerType } from '../../types/editorTrigger';
-import { EDITOR_TRIGGER_TYPES, TRIGGER_TYPE_LABEL, TRIGGER_COLOR, itemPickupConfig, dialogueConfig, restPointConfig } from '../../types/editorTrigger';
+import { EDITOR_TRIGGER_TYPES, TRIGGER_TYPE_LABEL, TRIGGER_COLOR, itemPickupConfig, dialogueConfig, restPointConfig, battleConfig } from '../../types/editorTrigger';
 import { useEditorTriggerStore } from '../../stores/editorTriggerStore';
+import { useEditorEncounterStore } from '../../stores/editorEncounterStore';
 import { useUiStore } from '../../stores/uiStore';
 import { evaluateTrigger } from '../../game/editor/evaluateTrigger';
 import { fireEditorTrigger } from '../../game/editor/fireEditorTrigger';
@@ -23,6 +24,7 @@ export const TriggerInspector = ({ trigger }: { trigger: EditorTrigger }) => {
   const closeHub = useUiStore((s) => s.toggleEditorHub);
   const itemOptions = useItemOptions();
   const dialogueOptions = useDialogueOptions();
+  const encounters = useEditorEncounterStore((s) => s.encounters);
   const [msg, setMsg] = useState<string | null>(null);
 
   const t = trigger;
@@ -30,6 +32,7 @@ export const TriggerInspector = ({ trigger }: { trigger: EditorTrigger }) => {
   const ev = evaluateTrigger(t);
   const valid = validateTriggerLive(t);
   const isGate = t.triggerType === 'travelGate' || t.triggerType === 'zoneGate';
+  const isCombat = t.triggerType === 'battleTrigger' || t.triggerType === 'bossGate';
 
   const runTest = () => {
     const r = fireEditorTrigger(t, { test: true });
@@ -87,6 +90,12 @@ export const TriggerInspector = ({ trigger }: { trigger: EditorTrigger }) => {
       {t.triggerType === 'restPoint' && (
         <div className="grid grid-cols-2 gap-2 rounded border border-green-700/30 bg-green-950/20 p-2">
           <Field label="message"><input value={restPointConfig(t).message ?? ''} onChange={(e) => set({ restPoint: { ...restPointConfig(t), message: e.target.value } })} className={`col-span-2 ${inp}`} /></Field>
+        </div>
+      )}
+      {isCombat && (
+        <div className="grid grid-cols-2 gap-2 rounded border border-red-700/30 bg-red-950/20 p-2">
+          <Field label="encounterId (the battle)"><IdSelect value={battleConfig(t).encounterId} onChange={(v) => set({ battle: { ...battleConfig(t), encounterId: v } })} options={encounters.map((e) => ({ id: e.id, label: e.displayName }))} placeholder="(choose encounter)" /></Field>
+          <p className="col-span-2 text-[10px] leading-snug text-slate-500">Or link the trigger from the ⚔ Encounters tab. Battle triggers fire on contact (walk into them).</p>
         </div>
       )}
 

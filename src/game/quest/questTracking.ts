@@ -35,6 +35,7 @@ export function runQuestTracking(): void {
           case 'inspectObject':
           case 'triggerEvent':
           case 'useTravelGate': done = !!targetId && (flags.hasFlag(`trigger_fired_${targetId}`) || flags.hasFlag(targetId)); break;
+          case 'defeatEnemy': done = !!targetId && flags.hasFlag(`defeated_${targetId}`); break;
           default: break;
         }
         if (done) qs.updateObjective(q.id, o.id, true);

@@ -21,6 +21,7 @@ export function objectiveToTrack(o: EditorObjective): { type: string; targetId?:
     case 'triggerEvent': return { type: 'triggerEvent', targetId: t ?? o.relatedTriggerId };
     case 'useTravelGate': return { type: 'useTravelGate', targetId: t ?? o.relatedTriggerId };
     case 'unlockDoor': return { type: 'unlockDoor', targetId: t };
+    case 'defeatEnemy': return { type: 'defeatEnemy', targetId: t };
     default: return { type: 'custom', targetId: t };
   }
 }
@@ -38,6 +39,7 @@ export function describeObjective(o: EditorObjective): string {
     case 'triggerEvent': return `Trigger ${t || 'the event'}`;
     case 'useTravelGate': return `Use the gate ${t || ''}`.trim();
     case 'unlockDoor': return `Open ${t || 'the door'}`;
+    case 'defeatEnemy': return `Defeat ${t || 'the enemy'}`;
     default: return o.description?.trim() || 'Objective';
   }
 }
