@@ -11,6 +11,8 @@ import { syncEditorQuests } from './stores/editorQuestStore';
 import { InteractionHandler } from './game/interaction/InteractionHandler';
 import { Dock } from './ui/Dock';
 import { EditorHubPanel } from './ui/EditorHubPanel';
+import { EditAssetPalette } from './ui/EditAssetPalette';
+import { EditModeInspector } from './ui/EditModeInspector';
 import { TerrainBrushHud } from './ui/TerrainBrushHud';
 import { InteractionPrompt } from './ui/InteractionPrompt';
 import { WorldClockHUD } from './ui/WorldClockHUD';
@@ -70,6 +72,10 @@ export const App = () => {
       {!editMode && <InteractionPrompt />}
       {!editMode && <QuestTracker />}
       <DialogueBox />
+      {/* Edit Mode: independent panels — Assets (left-centre), Inspector (top-left), terrain palette, and
+          the centred draggable Hub — matching the original layout. */}
+      {editMode && <EditAssetPalette />}
+      {editMode && <EditModeInspector />}
       {editMode && <TerrainBrushHud />}
       {editMode && editorHubOpen && <EditorHubPanel />}
       <Canvas shadows dpr={[1, 1.75]} camera={{ position: [0, 5, 10], fov: 50, near: 0.1, far: 1500 }}>

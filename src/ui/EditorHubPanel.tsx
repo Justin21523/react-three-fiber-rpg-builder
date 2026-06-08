@@ -5,11 +5,10 @@ import { useAudioStore } from '../stores/audioStore';
 import { EnvironmentEditorPanel } from './editor/EnvironmentEditorPanel';
 import { NpcEditorTab } from './editor/NpcEditorTab';
 import { QuestEditorTab } from './editor/QuestEditorTab';
-import { EditAssetPalette } from './EditAssetPalette';
 
-type Tab = 'assets' | 'environment' | 'npc' | 'quest' | 'sim';
+// Assets is a SEPARATE panel (left-centre) — not a hub tab — to match the original layout.
+type Tab = 'environment' | 'npc' | 'quest' | 'sim';
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'assets', label: '🧊 Assets' },
   { id: 'environment', label: '🌤 Environment' },
   { id: 'npc', label: '🧑 NPC / Dialogue' },
   { id: 'quest', label: '📜 Quest / Item' },
@@ -45,11 +44,12 @@ const SimTab = () => {
   );
 };
 
-// Kit — the tabbed Editor Hub (free-move via the header, free-resize via the CSS handle). Holds the
-// generic editors: model Assets palette, Environment/terrain, and World time/weather.
+// Kit — the tabbed Editor Hub (opens centred, free-move via the header, free-resize via the CSS handle).
+// Translucent so it doesn't block the scene. Holds the Environment/terrain, NPC/Dialogue, Quest/Item and
+// World editors. (The Assets palette is a separate left-centre panel.)
 export const EditorHubPanel = () => {
   const close = useUiStore((s) => s.toggleEditorHub);
-  const [tab, setTab] = useState<Tab>('assets');
+  const [tab, setTab] = useState<Tab>('environment');
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const dragRef = useRef<{ ox: number; oy: number } | null>(null);
   useEffect(() => {
@@ -71,18 +71,18 @@ export const EditorHubPanel = () => {
     <div
       data-hub
       style={pos ? { left: pos.x, top: pos.y } : undefined}
-      className={`pointer-events-auto absolute z-[80] flex h-[80vh] max-h-[96vh] min-h-[18rem] w-[48rem] min-w-[22rem] max-w-[98vw] resize overflow-hidden rounded-2xl border border-violet-700/50 bg-slate-950/97 text-slate-200 shadow-2xl backdrop-blur-sm ${pos ? '' : 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'}`}
+      className={`pointer-events-auto absolute z-[80] flex h-[80vh] max-h-[96vh] min-h-[18rem] w-[48rem] min-w-[22rem] max-w-[98vw] resize overflow-hidden rounded-2xl border border-violet-700/50 bg-slate-950/75 text-slate-100 shadow-2xl backdrop-blur-md ${pos ? '' : 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'}`}
     >
-      <div className="flex w-44 shrink-0 flex-col border-r border-slate-800 bg-slate-900/60 p-2">
+      <div className="flex w-44 shrink-0 flex-col border-r border-slate-800/60 bg-slate-900/40 p-2">
         <div onPointerDown={onHeaderDown} className="mb-2 cursor-move select-none px-2 pt-1 text-sm font-bold text-violet-100" title="Drag to move">⚙ Editor Hub <span className="text-[9px] font-normal text-slate-500">⠿</span></div>
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} className={`mb-0.5 rounded-lg px-3 py-2 text-left text-xs font-semibold ${tab === t.id ? 'bg-violet-600/30 text-violet-100' : 'text-slate-300 hover:bg-slate-800'}`}>{t.label}</button>
         ))}
-        <div className="mt-auto px-1 pt-2 text-[10px] leading-relaxed text-slate-600">F1 toggles Edit Mode. Drop assets into src/assets/.</div>
+        <div className="mt-auto px-1 pt-2 text-[10px] leading-relaxed text-slate-600">Assets palette is at the left · Inspector top-left. Drop assets into src/assets/ or public/.</div>
       </div>
       <div className="relative min-w-0 flex-1 overflow-auto p-4 pr-10">
         <button onClick={close} aria-label="Close" className="absolute right-3 top-3 z-10 rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white">✕</button>
-        {tab === 'assets' ? <EditAssetPalette /> : tab === 'environment' ? <EnvironmentEditorPanel /> : tab === 'npc' ? <NpcEditorTab /> : tab === 'quest' ? <QuestEditorTab /> : <SimTab />}
+        {tab === 'environment' ? <EnvironmentEditorPanel /> : tab === 'npc' ? <NpcEditorTab /> : tab === 'quest' ? <QuestEditorTab /> : <SimTab />}
       </div>
     </div>
   );

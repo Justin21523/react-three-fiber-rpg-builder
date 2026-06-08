@@ -5,8 +5,8 @@ import { useDialogueStore } from '../../stores/dialogueStore';
 import { MODEL_ASSET_LIST } from '../../data/modelLibrary';
 import type { DialogueTree, DialogueNode, DialogueEffect } from '../../types/dialogue';
 
-const inp = 'rounded bg-slate-800 px-1.5 py-1 text-[11px] text-slate-100 border border-slate-700';
-const btn = 'rounded border border-slate-600 bg-slate-800 px-2 py-1 text-[11px] hover:bg-slate-700';
+const inp = 'rounded bg-slate-800 px-1.5 py-1 text-xs text-slate-100 border border-slate-700';
+const btn = 'rounded border border-slate-600 bg-slate-800 px-2 py-1 text-xs hover:bg-slate-700';
 
 // Effect kinds the kit's executeEffect understands, with their primary id field label.
 const EFFECT_KINDS: { type: DialogueEffect['type']; label: string; field?: string }[] = [
@@ -38,12 +38,12 @@ export const NpcEditorTab = () => {
       </div>
 
       {npcs.length === 0 ? (
-        <p className="rounded bg-slate-900/60 px-2 py-2 text-[11px] text-slate-400">No NPCs yet. Click “+ New NPC” — it spawns in the current area; select it below to edit its model, position and dialogue.</p>
+        <p className="rounded bg-slate-900/60 px-2 py-2 text-xs text-slate-400">No NPCs yet. Click “+ New NPC” — it spawns in the current area; select it below to edit its model, position and dialogue.</p>
       ) : (
         <div className="grid grid-cols-2 gap-1">
           {npcs.map((n) => (
             <button key={n.id} onClick={() => setSelId(n.id)} className={`truncate rounded border px-2 py-1 text-left ${selId === n.id ? 'border-violet-500 bg-violet-900/30 text-violet-100' : 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'}`}>
-              {n.name} <span className="text-[9px] text-slate-500">· {n.areaId}</span>
+              {n.name} <span className="text-xs text-slate-300">· {n.areaId}</span>
             </button>
           ))}
         </div>
@@ -52,7 +52,7 @@ export const NpcEditorTab = () => {
       {sel && (
         <div className="space-y-2 rounded border border-slate-700 bg-slate-900/50 p-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500">id: {sel.id}</span>
+            <span className="text-xs text-slate-300">id: {sel.id}</span>
             <div className="flex gap-1">
               <button className={btn} onClick={() => sel.dialogueTreeId && useDialogueStore.getState().startDialogue(sel.dialogueTreeId)}>▶ Test talk</button>
               <button className={`${btn} text-red-300`} onClick={() => { useEditorNpcStore.getState().removeNpc(sel.id); if (sel.dialogueTreeId) useEditorNpcStore.getState().removeDialogueTree(sel.dialogueTreeId); setSelId(null); }}>Delete</button>
@@ -105,7 +105,7 @@ const DialogueTreeEditor = ({ tree }: { tree: DialogueTree }) => {
   return (
     <div className="space-y-2 rounded border border-slate-700/70 bg-slate-950/40 p-2">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">Dialogue · root: {tree.rootNodeId}</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-cyan-300">Dialogue · root: {tree.rootNodeId}</span>
         <button className={btn} onClick={addNode}>+ Node</button>
       </div>
       {nodeIds.map((nid) => {
@@ -113,7 +113,7 @@ const DialogueTreeEditor = ({ tree }: { tree: DialogueTree }) => {
         return (
           <div key={nid} className="space-y-1 rounded border border-slate-700 bg-slate-900/60 p-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-500">{nid}{nid === tree.rootNodeId ? ' (root)' : ''}</span>
+              <span className="text-xs text-slate-300">{nid}{nid === tree.rootNodeId ? ' (root)' : ''}</span>
               <div className="flex gap-1">
                 {nid !== tree.rootNodeId && <button className={btn} onClick={() => update({ ...tree, rootNodeId: nid })}>Set root</button>}
                 {nid !== tree.rootNodeId && <button className={`${btn} text-red-300`} onClick={() => removeNode(nid)}>✕</button>}
@@ -122,7 +122,7 @@ const DialogueTreeEditor = ({ tree }: { tree: DialogueTree }) => {
             <input className={`w-full ${inp}`} value={node.speaker} onChange={(e) => setNode(nid, { speaker: e.target.value })} placeholder="Speaker" />
             <textarea className={`w-full ${inp}`} rows={2} value={node.text} onChange={(e) => setNode(nid, { text: e.target.value })} placeholder="Line text" />
             {!node.choices?.length && (
-              <label className="flex items-center gap-1 text-[10px] text-slate-400">Then →
+              <label className="flex items-center gap-1 text-xs text-slate-400">Then →
                 <select className={`flex-1 ${inp}`} value={node.nextNodeId ?? ''} onChange={(e) => setNode(nid, { nextNodeId: e.target.value || null })}>
                   <option value="">(end)</option>
                   {nodeIds.filter((x) => x !== nid).map((x) => <option key={x} value={x}>{x}</option>)}
@@ -144,7 +144,7 @@ const ChoicesEditor = ({ tree, nid, setNode, nodeIds }: { tree: DialogueTree; ni
 
   return (
     <div className="space-y-1 border-t border-slate-800 pt-1">
-      <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500">Choices</span>
+      <div className="flex items-center justify-between"><span className="text-xs text-slate-300">Choices</span>
         <button className={btn} onClick={() => setChoices([...choices, { id: `c_${Date.now().toString(36)}`, text: 'Option', nextNodeId: null }])}>+ Choice</button>
       </div>
       {choices.map((c, ci) => {
