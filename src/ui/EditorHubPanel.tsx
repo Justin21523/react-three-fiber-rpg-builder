@@ -1,59 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { useUiStore } from '../stores/uiStore';
-import { useWorldClockStore, formatClock } from '../stores/worldClockStore';
-import { useAudioStore } from '../stores/audioStore';
 import { EnvironmentEditorPanel } from './editor/EnvironmentEditorPanel';
 import { NpcEditorTab } from './editor/NpcEditorTab';
 import { QuestEditorTab } from './editor/QuestEditorTab';
 import { TriggerEditorTab } from './editor/TriggerEditorTab';
 import { ProjectTab } from './editor/ProjectTab';
+import { DebugTab } from './editor/DebugTab';
 
 // Assets is a SEPARATE panel (left-centre) — not a hub tab — to match the original layout.
-type Tab = 'trigger' | 'project' | 'npc' | 'quest' | 'environment' | 'sim';
+type Tab = 'debug' | 'trigger' | 'project' | 'npc' | 'quest' | 'environment';
 const TABS: { id: Tab; label: string }[] = [
+  { id: 'debug', label: '🧪 Debug' },
   { id: 'trigger', label: '⚡ Triggers' },
   { id: 'project', label: '📦 Project' },
   { id: 'npc', label: '🧑 NPC / Dialogue' },
   { id: 'quest', label: '📜 Quest / Item' },
   { id: 'environment', label: '🌤 Environment' },
-  { id: 'sim', label: '🕓 World' },
 ];
 
-const SimTab = () => {
-  const time = useWorldClockStore((s) => s.timeMinutes);
-  const phase = useWorldClockStore((s) => s.timeOfDay);
-  const weather = useWorldClockStore((s) => s.weather);
-  const particlesEnabled = useAudioStore((s) => s.particlesEnabled);
-  const density = useAudioStore((s) => s.particleDensity);
-  return (
-    <div className="space-y-3 text-sm">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-violet-300">World — {formatClock(time)} · {phase} · {weather}</h3>
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => useWorldClockStore.getState().advanceTime()} className="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs hover:bg-slate-700">⏭ Skip to next phase</button>
-        <button onClick={() => useWorldClockStore.getState().cycleWeather()} className="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs hover:bg-slate-700">🌧 Cycle weather</button>
-        <button onClick={() => useAudioStore.getState().toggleParticles()} className={`rounded border px-3 py-1.5 text-xs ${particlesEnabled ? 'border-cyan-500/60 bg-cyan-900/40 text-cyan-100' : 'border-slate-600 bg-slate-800 hover:bg-slate-700'}`}>✨ Particles {particlesEnabled ? 'on' : 'off'}</button>
-      </div>
-      {particlesEnabled && (
-        <label className="flex items-center gap-2 text-[11px] text-slate-400">
-          Density
-          <select value={density} onChange={(e) => useAudioStore.getState().setParticleDensity(e.target.value as 'low' | 'medium' | 'high')} className="rounded bg-slate-800 px-1.5 py-1 text-[11px] text-slate-100">
-            <option value="low">low</option>
-            <option value="medium">medium</option>
-            <option value="high">high</option>
-          </select>
-        </label>
-      )}
-      <p className="text-[11px] leading-relaxed text-slate-500">Day/night runs in real time; rain + night fireflies + per-biome motes show when particles are on. Pin a stable sky per area in the Environment tab.</p>
-    </div>
-  );
-};
-
 // Kit — the tabbed Editor Hub (opens centred, free-move via the header, free-resize via the CSS handle).
-// Translucent so it doesn't block the scene. Holds the Environment/terrain, NPC/Dialogue, Quest/Item and
-// World editors. (The Assets palette is a separate left-centre panel.)
+// Translucent so it doesn't block the scene. (The Assets palette is a separate left-centre panel.)
 export const EditorHubPanel = () => {
   const close = useUiStore((s) => s.toggleEditorHub);
-  const [tab, setTab] = useState<Tab>('environment');
+  const [tab, setTab] = useState<Tab>('debug');
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const [scale, setScale] = useState(1); // hub zoom (60%–200%)
   const dragRef = useRef<{ ox: number; oy: number } | null>(null);
@@ -99,7 +68,7 @@ export const EditorHubPanel = () => {
       </div>
       <div className="relative min-w-0 flex-1 overflow-auto p-4 pr-10">
         <button onClick={close} aria-label="Close" className="absolute right-3 top-3 z-10 rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white">✕</button>
-        {tab === 'trigger' ? <TriggerEditorTab /> : tab === 'project' ? <ProjectTab /> : tab === 'npc' ? <NpcEditorTab /> : tab === 'quest' ? <QuestEditorTab /> : tab === 'environment' ? <EnvironmentEditorPanel /> : <SimTab />}
+        {tab === 'debug' ? <DebugTab /> : tab === 'trigger' ? <TriggerEditorTab /> : tab === 'project' ? <ProjectTab /> : tab === 'npc' ? <NpcEditorTab /> : tab === 'quest' ? <QuestEditorTab /> : <EnvironmentEditorPanel />}
       </div>
     </div>
   );
