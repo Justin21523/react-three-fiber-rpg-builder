@@ -5,12 +5,21 @@
 // it to the Vite-hashed URL at load time, and still passes through literal URLs (public/ paths, remote).
 
 const ROOT = '/src/assets/textures/';
+const PUBLIC_ROOT = '/public/textures/';
 
 const MODULES = import.meta.glob('/src/assets/textures/**/*.{jpg,jpeg,png,webp,avif}', {
   eager: true,
   query: '?url',
   import: 'default',
 }) as Record<string, string>;
+
+// public/textures/ images (served as-is): list keys only, derive the /textures/... URL by stripping /public.
+const PUBLIC_PAIRS: [string, string][] = Object.keys(
+  import.meta.glob('/public/textures/**/*.{jpg,jpeg,png,webp,avif}'),
+).map((abs) => [abs, abs.replace(/^\/public/, '')]);
+
+const stripRoot = (abs: string): string =>
+  abs.startsWith(ROOT) ? abs.slice(ROOT.length) : abs.startsWith(PUBLIC_ROOT) ? abs.slice(PUBLIC_ROOT.length) : abs;
 
 export type TextureRole = 'albedo' | 'normal' | 'roughness' | 'ao' | 'arm' | 'height' | 'metalness' | 'other';
 
@@ -61,9 +70,9 @@ function detectRole(stem: string): { role: TextureRole; setTokens: string[] } {
   return { role, setTokens };
 }
 
-export const TEXTURE_ENTRIES: TextureEntry[] = Object.entries(MODULES)
+export const TEXTURE_ENTRIES: TextureEntry[] = [...Object.entries(MODULES), ...PUBLIC_PAIRS]
   .map(([abs, url]) => {
-    const key = abs.startsWith(ROOT) ? abs.slice(ROOT.length) : abs;
+    const key = stripRoot(abs);
     const slash = key.lastIndexOf('/');
     const dir = slash >= 0 ? key.slice(0, slash + 1) : '';
     const fileName = slash >= 0 ? key.slice(slash + 1) : key;

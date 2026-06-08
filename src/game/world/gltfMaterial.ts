@@ -8,6 +8,7 @@ import { DataTexture, LoadingManager, Mesh, MeshStandardMaterial, RGBAFormat, SR
 // the hashed asset URLs (matched by file BASENAME). Use self-contained .glb to avoid that entirely.
 
 const ROOT = '/src/assets/materials/';
+const PUBLIC_ROOT = '/public/materials/';
 
 // The pickable material entry points (.glb / .gltf).
 const ENTRY_MODULES = import.meta.glob('/src/assets/materials/**/*.{glb,gltf}', {
@@ -18,6 +19,15 @@ const ENTRY_MODULES = import.meta.glob('/src/assets/materials/**/*.{glb,gltf}', 
 const ALL_MODULES = import.meta.glob('/src/assets/materials/**/*.{glb,gltf,bin,jpg,jpeg,png,webp,ktx2,basis}', {
   eager: true, query: '?url', import: 'default',
 }) as Record<string, string>;
+
+// public/materials/ entry points (served as-is): list keys, derive /materials/... URL by stripping /public.
+// Sibling .bin / textures are served alongside automatically, so no URL rewrite is needed for these.
+const PUBLIC_ENTRY_PAIRS: [string, string][] = Object.keys(
+  import.meta.glob('/public/materials/**/*.{glb,gltf}'),
+).map((abs) => [abs, abs.replace(/^\/public/, '')]);
+
+const stripMatRoot = (abs: string): string =>
+  abs.startsWith(ROOT) ? abs.slice(ROOT.length) : abs.startsWith(PUBLIC_ROOT) ? abs.slice(PUBLIC_ROOT.length) : abs;
 
 const basename = (p: string) => decodeURIComponent((p.split('?')[0].split('#')[0].split('/').pop()) ?? '');
 
@@ -31,9 +41,9 @@ export interface MaterialSet {
   url: string;   // Vite-hashed runtime URL of the .glb/.gltf
 }
 
-export const MATERIAL_SETS: MaterialSet[] = Object.entries(ENTRY_MODULES)
+export const MATERIAL_SETS: MaterialSet[] = [...Object.entries(ENTRY_MODULES), ...PUBLIC_ENTRY_PAIRS]
   .map(([abs, url]) => {
-    const key = abs.startsWith(ROOT) ? abs.slice(ROOT.length) : abs;
+    const key = stripMatRoot(abs);
     const label = (key.split('/').pop() || key).replace(/\.[^.]+$/, '').replace(/_4k|_2k|_1k/gi, '').replace(/[_-]/g, ' ').trim();
     return { key, label, url };
   })

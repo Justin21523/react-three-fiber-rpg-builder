@@ -2,3 +2,22 @@ node_modules
 dist
 *.local
 .DS_Store
+
+# User-dropped binary assets are large (multi-GB texture/model packs) and are NOT version-controlled.
+# The folders + their README / .gitkeep stay tracked so the drop-in contract is documented.
+src/assets/**/*.glb
+src/assets/**/*.gltf
+src/assets/**/*.bin
+src/assets/**/*.jpg
+src/assets/**/*.jpeg
+src/assets/**/*.png
+src/assets/**/*.webp
+src/assets/**/*.avif
+src/assets/**/*.ktx2
+src/assets/**/*.basis
+src/assets/**/*.hdr
+public/models/**
+public/textures/**
+public/materials/**
+!**/README.md
+!**/.gitkeep
